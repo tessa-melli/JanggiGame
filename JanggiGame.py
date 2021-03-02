@@ -4,21 +4,6 @@
 
 # Write a class named JanggiGame for playing an abstract board came called Janggi
 
-# DO NOT NEED TO IMPLEMENT
-#   perpetual check
-#   position repetition
-#   draw
-#   miscellaneous rules
-
-# DO NEED:
-#   checkmate
-#   piece-specific rules
-#       generals aren't allowed to leave the palaces
-#       horses and elephants can be blocked
-#           * blocking occurs if a piece is in any part of the move by either opponents or own piece
-#       cannons cannot capture other cannons
-#   cannot make a move that puts or leaves their general in check
-
 
 class Piece:
     """Represents a generic piece"""
@@ -26,57 +11,146 @@ class Piece:
     # method for get_piece_type
     # self._piece_location = ??
     # method for get_piece_location
+    # method for set_piece_location
+
+    def __init__(self, piece_type, location, cartesian, color):
+        self._piece_info = {'type': piece_type,
+                            'color': color,
+                            'location': location,
+                            'cartesian': cartesian,
+                            'checking': False}
+
+        self._letter_to_number = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8, 'i': 9}
+
+    def get_type(self):
+        return self._piece_info['type']
+
+    def get_color(self):
+        return self._piece_info['color']
+
+    def get_location(self):
+        return self._piece_info['location']
+
+    def set_location(self, new_location):
+        self._piece_info['location'] = new_location
+
+    def get_cartesian(self):
+        return self._piece_info['cartesian']
+
+    def set_cartesian(self, new_location):
+        self._piece_info['cartesian'] = new_location
+
+    def get_is_checking(self):
+        return self._piece_info['checking']
+
+    def set_is_checking(self, checking):
+        self._piece_info['checking'] = checking
 
 
 class General:
     """Represents the General piece, inherits from the Piece class"""
     # self._piece_type = 'GENERAL'
+    # May move one step per turn along marked board lines to any of the nine points within the palace
+    # General cannot leave the palace
+    # Can choose to make no move
 
 
 class Guard:
     """Represents the Guard piece, inherits from the Piece class"""
     # self._piece_type = 'GUARD'
+    # Move the same as the general
+    # Cannot leave the palace
 
 
 class Horse:
     """Represents the Horse piece, inherits from the Piece class"""
     # self._piece_type = 'HORSE'
+    # moves one step orthogonally, then one step diagonally outward
+    # no jumping (can be blocked - up to 2 spots)
 
 
 class Elephant:
     """Represents the Elephant piece, inherits from the Piece class"""
     # self._piece_type = 'ELEPHANT'
+    # move one point orthogonally followed by two points diagonally
+    # blocked by any intervening pieces (up to 3 spots)
 
 
 class Chariot:
     """Represents the Chariot piece, inherits from the Piece class"""
     # self._piece_type = 'CHARIOT'
+    # moves and captures in a straight line (horizontally or vertically)
+    # May move along diagonal lines inside either palace
 
 
 class Cannon:
     """Represents the Cannon piece, inherits from the Piece class"""
     # self._piece_type = 'CANNON'
+    # moves by jumping another piece horizontally or vertically
+    # must be exactly one piece (friendly or otherwise) between from & to position
+    # cannot jump over or capture another cannon
+    # can jump diagonally w/in the palace
 
 
 class Soldier:
     """Represents the Soldier piece, inherits from the Piece class"""
     # self._piece_type = 'Soldier'
+    # move one point forward or sideways
+    # can move diagonally forward w/in enemy palace
 
 
 class GameBoard:
     """A game board to visualize the current game state"""
 
-    # Contains a depiction of the physical gameboard
+    # Contains a depiction of the physical game board
     # Also contains the key to translate between the board locations and cartesian coordinates
-    # self._letter_to_number = {a:1, b:2, c:3, d:4, e:5, f:6, g:7, h:8, i:9}
+    #
+
+    def __init__(self):
+        self._game_board = [
+            ['0 ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'],
+            ['1 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['2 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['3 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['4 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['5 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['6 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['7 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['8 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['9 ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['10', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        ]
 
 
 class BluePlayer:
     """Represents the Blue player"""
+    # has a list(?) containing all of the blue Pieces
+    def __init__(self):
+        self._blue_pieces = {'blue_general': General(),
+                             'blue_guard_1': Guard(), 'blue_guard_2': Guard(),
+                             'blue_horse_1': Horse(), 'blue_horse_2': Horse(),
+                             'blue_elephant_1': Elephant(), 'blue_elephant_2': Elephant(),
+                             'blue_chariot_1': Chariot(), 'blue_chariot_2': Chariot(),
+                             'blue_cannon_1': Cannon(), 'blue_cannon_2': Cannon(),
+                             'blue_soldier_1': Soldier(), 'blue_soldier_2': Soldier(),
+                             'blue_soldier_3': Soldier(), 'blue_soldier_4': Soldier(),
+                             'blue_soldier_5': Soldier()}
 
 
 class RedPlayer:
     """Represents the Red player"""
+
+    def __init__(self):
+        self._red_pieces = {'red_general': General(),
+                            'red_guard_1': Guard(), 'red_guard_2': Guard(),
+                            'red_horse_1': Horse(), 'red_horse_2': Horse(),
+                            'red_elephant_1': Elephant(), 'red_elephant_2': Elephant(),
+                            'red_chariot_1': Chariot(), 'red_chariot_2': Chariot(),
+                            'red_cannon_1': Cannon(), 'red_cannon_2': Cannon(),
+                            'red_soldier_1': Soldier(), 'red_soldier_2': Soldier(),
+                            'red_soldier_3': Soldier(), 'red_soldier_4': Soldier(),
+                            'red_soldier_5': Soldier()
+                            }
 
 
 class JanggiGame:
@@ -87,6 +161,9 @@ class JanggiGame:
         """"""
         self._game_state = 'UNFINISHED'
         self._current_player = 'BLUE'
+        self._game_board = GameBoard()
+        self._blue_player = BluePlayer()
+        self._red_player = RedPlayer()
 
     # Method called get_game_state that returns 'UNFINISHED', 'RED_WON', or 'BLUE_WON'
     def get_game_state(self):
