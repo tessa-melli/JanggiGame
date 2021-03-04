@@ -9,7 +9,7 @@ class Piece:
     Each piece type class inherits from this Piece class
     """
 
-    def __init__(self, location, color):
+    def __init__(self, location, color, nickname):
         """
         Initializes the generic piece object
         :param location: piece's location on the board
@@ -17,6 +17,7 @@ class Piece:
         """
         self._piece_color = color
         self._piece_location = location
+        self._piece_nickname = nickname
         self._checking = False  # stores status of piece checking opponent's general
 
     def get_color(self):
@@ -39,6 +40,13 @@ class Piece:
         :param new_location: new piece location in algebraic notation
         """
         self._piece_location = new_location
+
+    def get_nickname(self):
+        """
+        Getter method for piece nickname
+        :return: nickname for piece to use for the game board representation
+        """
+        return self._piece_nickname
 
     def get_is_checking(self):
         """
@@ -74,14 +82,14 @@ class General(Piece):
     Inherits from the Piece class
     """
 
-    def __init__(self, location, color, directionality):
+    def __init__(self, location, color, nickname, directionality):
         """
         Initializes the General object
         :param location: location of the General piece
         :param color: color of the General piece
         :param directionality: directionality of the General piece (determines which palace it belongs to)
         """
-        super().__init__(location, color)
+        super().__init__(location, color, nickname)
         self._piece_type = 'GENERAL'
         self._directionality = directionality
 
@@ -119,14 +127,14 @@ class Guard(Piece):
     Inherits from the Piece class
     """
 
-    def __init__(self, location, color, directionality):
+    def __init__(self, location, color, nickname, directionality):
         """
         Initializes the Guard object
         :param location: location of the Guard piece
         :param color: color of the Guard piece
         :param directionality: directionality of the Guard piece (determines which palace it belongs to)
         """
-        super().__init__(location, color)
+        super().__init__(location, color, nickname)
         self._piece_type = 'GUARD'
         self._directionality = directionality
 
@@ -164,13 +172,13 @@ class Horse(Piece):
     Inherits from the Piece class
     """
 
-    def __init__(self, location, color):
+    def __init__(self, location, color, nickname):
         """
         Initializes the Horse object
         :param location: location of the Horse piece
         :param color: color of the Horse piece
         """
-        super().__init__(location, color)
+        super().__init__(location, color, nickname)
         self._piece_type = 'HORSE'
 
         self._move_conditions = []
@@ -200,13 +208,13 @@ class Elephant(Piece):
     Inherits from the Piece class
     """
 
-    def __init__(self, location, color):
+    def __init__(self, location, color, nickname):
         """
         Initializes the Elephant object
         :param location: location of the Elephant piece
         :param color: color of the Elephant piece
         """
-        super().__init__(location, color)
+        super().__init__(location, color, nickname)
         self._piece_type = 'ELEPHANT'
 
         self._move_conditions = []
@@ -236,13 +244,13 @@ class Chariot(Piece):
     Inherits from the Piece class
     """
 
-    def __init__(self, location, color):
+    def __init__(self, location, color, nickname):
         """
         Initializes the Chariot object
         :param location: location of the Chariot piece
         :param color: color of the Chariot piece
         """
-        super().__init__(location, color)
+        super().__init__(location, color, nickname)
         self._piece_type = 'CHARIOT'
 
         self._move_conditions = []
@@ -272,13 +280,13 @@ class Cannon(Piece):
     Inherits from the Piece class
     """
 
-    def __init__(self, location, color):
+    def __init__(self, location, color, nickname):
         """
         Initializes the Cannon object
         :param location: location of the Cannon piece
         :param color: color of the Cannon piece
         """
-        super().__init__(location, color)
+        super().__init__(location, color, nickname)
         self._piece_type = 'CANNON'
 
         self._move_conditions = []
@@ -312,14 +320,14 @@ class Soldier(Piece):
         > JanggiGame class will use the get_piece_type, get_move_conditions, and get_directionality methods
     """
 
-    def __init__(self, location, color, directionality):
+    def __init__(self, location, color, nickname, directionality):
         """
         Initializes the Soldier object
         :param location: location of the Soldier piece
         :param color: color of the Soldier piece
         :param directionality: directionality of the Soldier piece (determines which direction it can move)
         """
-        super().__init__(location, color)
+        super().__init__(location, color, nickname)
         self._piece_type = 'SOLDIER'
         self._directionality = directionality
 
@@ -361,33 +369,38 @@ class GameBoard:
         Initializes the visual representation of the game board with pieces at their starting locations
         """
         self._game_board = [
-            ['0 ', '  a  ', '  b  ', '  c  ', '  d  ', '  e  ', '  f  ', '  g  ', '  h  ', '  i  '],
-            ['1 ', ' RCh1', ' RE1 ', ' RH1 ', ' RGu1', '     ', ' RGu2', ' RE2 ', ' RH2 ', ' RCh2'],
-            ['2 ', '     ', '     ', '     ', '     ', ' RGe ', '     ', '     ', '     ', '     '],
-            ['3 ', '     ', ' RCa1', '     ', '     ', '     ', '     ', '     ', ' RCa2', '     '],
-            ['4 ', ' RS1 ', '     ', ' RS2 ', '     ', ' RS3 ', '     ', ' RS4 ', '     ', ' RS5 '],
-            ['5 ', '     ', '     ', '     ', '     ', '     ', '     ', '     ', '     ', '     '],
-            ['6 ', '     ', '     ', '     ', '     ', '     ', '     ', '     ', '     ', '     '],
-            ['7 ', ' BS1 ', '     ', ' BS2 ', '     ', ' BS3 ', '     ', ' BS4 ', '     ', ' BS5 '],
-            ['8 ', '     ', 'BCa1 ', '     ', '     ', '     ', '     ', '     ', ' BCa2', '     '],
-            ['9 ', '     ', '     ', '     ', '     ', ' BGe ', '     ', '     ', '     ', '     '],
-            ['10', ' BCh1', ' BE1 ', ' BH1 ', ' BGu1', '     ', 'BGu2 ', ' BE2 ', ' BH2 ', ' BCh2']
+            [' 0  ', '  a   ', '  b   ', '  c   ', '  d   ', '  e   ', '  f   ', '  g   ', '  h   ', '  i   '],
+            [' 1  ', ' RCh1 ', ' REl1 ', ' RHs1 ', ' RGd1 ', '      ', ' RGd2 ', ' REl2 ', ' RHs2 ', ' RCh2 '],
+            [' 2  ', '      ', '      ', '      ', '      ', ' RGen ', '      ', '      ', '      ', '      '],
+            [' 3  ', '      ', ' RCn1 ', '      ', '      ', '      ', '      ', '      ', ' RCn2 ', '      '],
+            [' 4  ', ' RSr1 ', '      ', ' RSr2 ', '      ', ' RSr3 ', '      ', ' RSr4 ', '      ', ' RSr5 '],
+            [' 5  ', '      ', '      ', '      ', '      ', '      ', '      ', '      ', '      ', '      '],
+            [' 6  ', '      ', '      ', '      ', '      ', '      ', '      ', '      ', '      ', '      '],
+            [' 7  ', ' BSr1 ', '      ', ' BSr2 ', '      ', ' BSr3 ', '      ', ' BSr4 ', '      ', ' BSr5 '],
+            [' 8  ', '      ', ' BCn1 ', '      ', '      ', '      ', '      ', '      ', ' BCn2 ', '      '],
+            [' 9  ', '      ', '      ', '      ', '      ', ' BGen ', '      ', '      ', '      ', '      '],
+            [' 10 ', ' BCh1 ', ' BEl1 ', ' BHs1 ', ' BGd1 ', '      ', ' BGd2 ', ' BEl2 ', ' BHs2 ', ' BCh2 ']
         ]
 
-    def modify_game_board(self, row_index, column_index):
+    def modify_game_board(self, row_index, column_index, new_value):
         """
         Method used to modify the board after each player's turn
         :param row_index: row index of location to modify
         :param column_index: column index of location to modify
+        :param new_value: new value for the specified board location
         """
         pass
+
+        self._game_board[row_index][column_index] = new_value
 
     def print_game_board(self):
         """
         Method that prints each row of the game board on a separate line.
         Used for visualization/troubleshooting purposes only.
         """
-        pass
+        for board_row in self._game_board:
+            print(board_row)
+        print('')
 
 
 class BluePlayer:
@@ -397,22 +410,29 @@ class BluePlayer:
 
     def __init__(self):
         """Initializes the blue player's pieces"""
-        self._blue_pieces = {'BlueGeneral': General('e9', 'BLUE', -1),
-                             'BlueGuard1': Guard('d10', 'BLUE', -1),
-                             'BlueGuard2': Guard('f10', 'BLUE', -1),
-                             'BlueHorse1': Horse('c10', 'BLUE'),
-                             'BlueHorse2': Horse('h10', 'BLUE'),
-                             'BlueElephant1': Elephant('b10', 'BLUE'),
-                             'BlueElephant2': Elephant('g10', 'BLUE'),
-                             'BlueChariot1': Chariot('a10', 'BLUE'),
-                             'BlueChariot2': Chariot('i10', 'BLUE'),
-                             'BlueCannon1': Cannon('b8', 'BLUE'),
-                             'BlueCannon2': Cannon('h8', 'BLUE'),
-                             'BlueSoldier1': Soldier('a7', 'BLUE', -1),
-                             'BlueSoldier2': Soldier('c7', 'BLUE', -1),
-                             'BlueSoldier3': Soldier('e7', 'BLUE', -1),
-                             'BlueSoldier4': Soldier('g7', 'BLUE', -1),
-                             'BlueSoldier5': Soldier('i7', 'BLUE', -1)}
+        self._blue_pieces = {'BlueGeneral': General('e9', 'BLUE', ' BGen ', -1),
+                             'BlueGuard1': Guard('d10', 'BLUE', ' BGd1 ', -1),
+                             'BlueGuard2': Guard('f10', 'BLUE', ' BGd2 ', -1),
+                             'BlueHorse1': Horse('c10', 'BLUE', ' BHs1 '),
+                             'BlueHorse2': Horse('h10', 'BLUE', ' BHs2 '),
+                             'BlueElephant1': Elephant('b10', 'BLUE', ' BEl1 '),
+                             'BlueElephant2': Elephant('g10', 'BLUE', ' BEl2 '),
+                             'BlueChariot1': Chariot('a10', 'BLUE', ' BCh1 '),
+                             'BlueChariot2': Chariot('i10', 'BLUE', ' BCh2 '),
+                             'BlueCannon1': Cannon('b8', 'BLUE', ' BCn1 '),
+                             'BlueCannon2': Cannon('h8', 'BLUE', ' BCn2 '),
+                             'BlueSoldier1': Soldier('a7', 'BLUE', ' BSr1 ', -1),
+                             'BlueSoldier2': Soldier('c7', 'BLUE', ' BSr2 ', -1),
+                             'BlueSoldier3': Soldier('e7', 'BLUE', ' BSr3 ', -1),
+                             'BlueSoldier4': Soldier('g7', 'BLUE', ' BSr4 ', -1),
+                             'BlueSoldier5': Soldier('i7', 'BLUE', ' BSr5 ', -1)}
+
+    def get_blue_pieces(self):
+        """
+        Getter method for blue pieces dictionary
+        :return: Dictionary containing piece objects of the blue player
+        """
+        return self._blue_pieces
 
 
 class RedPlayer:
@@ -422,22 +442,29 @@ class RedPlayer:
 
     def __init__(self):
         """Initializes the red player's pieces"""
-        self._red_pieces = {'RedGeneral': General('e2', 'RED', 1),
-                            'RedGuard1': Guard('d1', 'RED', 1),
-                            'RedGuard2': Guard('f1', 'RED', 1),
-                            'RedHorse1': Horse('c1', 'RED'),
-                            'RedHorse2': Horse('h1', 'RED'),
-                            'RedElephant1': Elephant('b1', 'RED'),
-                            'RedElephant2': Elephant('g1', 'RED'),
-                            'RedChariot1': Chariot('a1', 'RED'),
-                            'RedChariot2': Chariot('i1', 'RED'),
-                            'RedCannon1': Cannon('b3', 'RED'),
-                            'RedCannon2': Cannon('h3', 'RED'),
-                            'RedSoldier1': Soldier('a4', 'RED', 1),
-                            'RedSoldier2': Soldier('c4', 'RED', 1),
-                            'RedSoldier3': Soldier('e4', 'RED', 1),
-                            'RedSoldier4': Soldier('g4', 'RED', 1),
-                            'RedSoldier5': Soldier('i4', 'RED', 1)}
+        self._red_pieces = {'RedGeneral': General('e2', 'RED', ' RGen ', 1),
+                            'RedGuard1': Guard('d1', 'RED', ' RGd1 ', 1),
+                            'RedGuard2': Guard('f1', 'RED', ' RGd2 ', 1),
+                            'RedHorse1': Horse('c1', 'RED', ' RHs1 '),
+                            'RedHorse2': Horse('h1', 'RED', ' RHs2 '),
+                            'RedElephant1': Elephant('b1', 'RED', ' REl1 '),
+                            'RedElephant2': Elephant('g1', 'RED', ' REl2 '),
+                            'RedChariot1': Chariot('a1', 'RED', ' RCh1 '),
+                            'RedChariot2': Chariot('i1', 'RED', ' RCh2 '),
+                            'RedCannon1': Cannon('b3', 'RED', ' RCn1 '),
+                            'RedCannon2': Cannon('h3', 'RED', ' RCn2 '),
+                            'RedSoldier1': Soldier('a4', 'RED', ' RSr1 ', 1),
+                            'RedSoldier2': Soldier('c4', 'RED', ' RSr2 ', 1),
+                            'RedSoldier3': Soldier('e4', 'RED', ' RSr3 ', 1),
+                            'RedSoldier4': Soldier('g4', 'RED', ' RSr4 ', 1),
+                            'RedSoldier5': Soldier('i4', 'RED', ' RSr5 ', 1)}
+
+    def get_red_pieces(self):
+        """
+        Getter method for red pieces dictionary
+        :return: Dictionary containing piece objects of the red player
+        """
+        return self._red_pieces
 
 
 class JanggiGame:
@@ -584,3 +611,14 @@ class JanggiGame:
         #   Return True
 
         pass
+
+
+JG = JanggiGame()
+print(JG.get_game_state())
+JG.get_game_board().print_game_board()
+for each_piece in JG.get_red_player().get_red_pieces():
+    print(JG.get_red_player().get_red_pieces()[each_piece].get_nickname())
+for each_piece in JG.get_red_player().get_red_pieces():
+    print(JG.get_red_player().get_red_pieces()[each_piece].get_piece_type())
+for each_piece in JG.get_red_player().get_red_pieces():
+    print(JG.get_red_player().get_red_pieces()[each_piece].get_location())
