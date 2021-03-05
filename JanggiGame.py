@@ -14,11 +14,14 @@ class Piece:
         Initializes the generic piece object
         :param location: piece's location on the board
         :param color: color of the piece
+        :param nickname: nickname of the piece for the game board representation
         """
         self._piece_color = color
         self._piece_location = location
         self._piece_nickname = nickname
         self._checking = False  # stores status of piece checking opponent's general
+        self._blue_palace = [[8, 4], [10, 4], [9, 5], [8, 6], [10, 6], [9, 4], [8, 5], [10, 5], [9, 6]]
+        self._red_palace = [[1, 4], [3, 4], [2, 5], [1, 6], [3, 6], [2, 4], [1, 5], [3, 5], [2, 6]]
 
     def get_color(self):
         """
@@ -63,17 +66,19 @@ class Piece:
         """
         self._checking = checking_status
 
-    def valid_move(self, from_location, to_location, move_conditions, directionality=None):
+    def get_palace(self, directionality):
         """
-        Determines if the given move is valid according to the piece movement rules
-        :param from_location: location the piece is moving from (list of indices in cartesian coordinates)
-        :param to_location: location the piece is moving to (list of indices in cartesian coordinates)
-        :param move_conditions: specific conditions that apply to the piece type
-        :param directionality: directionality of a piece depending on piece type (i.e., General, Guard, Soldier)
-        :return: True - if the move is valid according to the piece movement rules
-                 False - if the move is not valid according to the piece movement rules
+
+        :param directionality:
+        :return:
         """
-        pass
+
+        if directionality == 1:
+            return self._red_palace
+        elif directionality == -1:
+            return self._blue_palace
+        else:
+            return None
 
 
 class General(Piece):
@@ -93,11 +98,7 @@ class General(Piece):
         self._piece_type = 'GENERAL'
         self._directionality = directionality
 
-        self._move_conditions = []
-        # TBD data structure that will hold move conditions for the general piece
-        #   May move one step per turn along marked board lines to any of the nine points within the palace
-        #   General cannot leave the palace (directionality used to determine which palace it belongs to)
-        #   Can choose to make no move (as long as not already in check)
+
 
     def get_piece_type(self):
         """
@@ -113,13 +114,29 @@ class General(Piece):
         """
         return self._directionality
 
-    def get_move_conditions(self):
+    def valid_move(self, from_cartesian, to_cartesian, directionality):
         """
-        Getter method for the General move conditions
-        :return: move conditions for the General
-        """
-        return self._move_conditions
 
+        :param from_cartesian:
+        :param to_cartesian:
+        :param directionality:
+        :return:
+        """
+
+        # Trying to move guard out of the palace
+        if to_cartesian not in self.get_palace(directionality):
+            return False
+
+        # if in one of the corners or in the center position:
+        if from_cartesian in self.get_palace(directionality)[0:4]:
+            if not (abs(from_cartesian[0] - to_cartesian[0]) <= 1 and abs(from_cartesian[1] - to_cartesian[1]) <= 1):
+                return False
+        # if currently on one of the 4 side positions
+        else:
+            if not abs(from_cartesian[0] - to_cartesian[0]) + abs(from_cartesian[1] - to_cartesian[1]) == 1:
+                return False
+
+        return True
 
 class Guard(Piece):
     """
@@ -138,12 +155,6 @@ class Guard(Piece):
         self._piece_type = 'GUARD'
         self._directionality = directionality
 
-        self._move_conditions = []
-        # TBD data structure that will hold move conditions for the general piece
-        #   Move the same as the general
-        #   Cannot leave the palace
-        #   May choose to skip turn (as long as General is not already in check)
-
     def get_piece_type(self):
         """
         Getter method for the piece type
@@ -158,12 +169,29 @@ class Guard(Piece):
         """
         return self._directionality
 
-    def get_move_conditions(self):
+    def valid_move(self, from_cartesian, to_cartesian, directionality):
         """
-        Getter method for the Guard move conditions
-        :return: move conditions for the Guard
+
+        :param from_cartesian:
+        :param to_cartesian:
+        :param directionality:
+        :return:
         """
-        return self._move_conditions
+
+        # Trying to move guard out of the palace
+        if to_cartesian not in self.get_palace(directionality):
+            return False
+
+        # if in one of the corners or in the center position:
+        if from_cartesian in self.get_palace(directionality)[0:4]:
+            if not (abs(from_cartesian[0] - to_cartesian[0]) <= 1 and abs(from_cartesian[1] - to_cartesian[1]) <= 1):
+                return False
+        # if currently on one of the 4 side positions
+        else:
+            if not abs(from_cartesian[0] - to_cartesian[0]) + abs(from_cartesian[1] - to_cartesian[1]) == 1:
+                return False
+
+        return True
 
 
 class Horse(Piece):
@@ -185,7 +213,6 @@ class Horse(Piece):
         # TBD data structure that will hold move conditions for the horse piece
         #   moves one step orthogonally, then one step diagonally outward
         #   no jumping (can be blocked - up to 2 spots)
-        #   can choose to skip turn (as long as General is not already in check)
 
     def get_piece_type(self):
         """
@@ -331,12 +358,6 @@ class Soldier(Piece):
         self._piece_type = 'SOLDIER'
         self._directionality = directionality
 
-        self._move_conditions = []
-        # TBD data structure that will hold move conditions for the Soldier piece
-        #   move one point forward or sideways
-        #   can move diagonally forward w/in enemy palace
-        #   can choose to skip turn (as long as general is not already in check)
-
     def get_piece_type(self):
         """
         Getter method for the piece type
@@ -351,12 +372,32 @@ class Soldier(Piece):
         """
         return self._directionality
 
-    def get_move_conditions(self):
+    def valid_move(self, from_cartesian, to_cartesian, directionality):
         """
-        Getter method for the Soldier move conditions
-        :return: move conditions for the Soldier
+
+        :param from_cartesian:
+        :param to_cartesian:
+        :param directionality:
+        :return:
         """
-        return self._move_conditions
+
+        if abs(from_cartesian[1] - to_cartesian[1]) > 1:
+            return False
+
+        if not (to_cartesian[0] - from_cartesian[0] == 0 or
+                directionality * (to_cartesian[0] - from_cartesian[0]) == 1):
+            return False
+
+        # if in diagonals or center of palace:
+        if from_cartesian in self.get_palace(1)[0:4] or from_cartesian in self.get_palace(-1)[0:4]:
+            # add ability to go diagonally
+            if abs(to_cartesian[0] - from_cartesian[0]) + abs(to_cartesian[1] - from_cartesian[1]) > 2:
+                return False
+
+        # if not:
+        else:
+            if abs(to_cartesian[0] - from_cartesian[0]) + abs(to_cartesian[1] - from_cartesian[1]) > 1:
+                return False
 
 
 class GameBoard:
@@ -427,7 +468,7 @@ class BluePlayer:
                              'BlueSoldier4': Soldier('g7', 'BLUE', ' BSr4 ', -1),
                              'BlueSoldier5': Soldier('i7', 'BLUE', ' BSr5 ', -1)}
 
-    def get_blue_pieces(self):
+    def get_pieces(self):
         """
         Getter method for blue pieces dictionary
         :return: Dictionary containing piece objects of the blue player
@@ -459,7 +500,7 @@ class RedPlayer:
                             'RedSoldier4': Soldier('g4', 'RED', ' RSr4 ', 1),
                             'RedSoldier5': Soldier('i4', 'RED', ' RSr5 ', 1)}
 
-    def get_red_pieces(self):
+    def get_pieces(self):
         """
         Getter method for red pieces dictionary
         :return: Dictionary containing piece objects of the red player
@@ -520,19 +561,19 @@ class JanggiGame:
         """
         return self._game_board
 
-    def get_blue_player(self):
+    def get_player_obj(self, player_color):
         """
-        Getter method for the BluePlayer object
-        :return: the BluePlayer object
+        Getter method for the Player objects
+        :param player_color: color of the player
+        :return: the Player object corresponding to the player color
         """
-        return self._blue_player
 
-    def get_red_player(self):
-        """
-        Getter method for the RedPlayer object
-        :return: the RedPlayer object
-        """
-        return self._red_player
+        if player_color == 'BLUE':
+            return self._blue_player
+        elif player_color == 'RED':
+            return self._red_player
+        else:
+            return False
 
     def get_letter_to_number(self):
         """
@@ -556,6 +597,43 @@ class JanggiGame:
         :return: the location in algebraic notation
         """
         pass
+
+    def moving_own_piece(self, from_location, player):
+        """
+
+        :param from_location:
+        :param player:
+        :return:
+        """
+
+        for each_piece in player.get_pieces():
+            if player.get_pieces()[each_piece].get_location() == from_location:
+                return True
+        return False
+
+    def capturing_own_piece(self, to_location, player):
+        """
+
+        :param to_location:
+        :param player:
+        :return:
+        """
+        for each_piece in player.get_pieces():
+            if player.get_pieces()[each_piece].get_location() == to_location:
+                return True
+        return False
+
+    def skipping_turn(self, from_location, to_location):
+        """
+
+        :param from_location:
+        :param to_location:
+        :return:
+        """
+        if from_location == to_location:
+            return True
+        else:
+            return False
 
     def is_in_check(self, player):
         """
@@ -595,11 +673,25 @@ class JanggiGame:
                  True - if the indicated move is performed
         """
 
-        # Return False:
         #   If the game has already been won
+        if self.get_game_state() != 'UNFINISHED':
+            return False
         #   If the from_location does not have a current player's piece
-        #   to_location has a different piece of the current player's color
-        #   If the indicated move is not legal due to movement rules of piece (valid_move method)
+        if not self.moving_own_piece(from_location, self.get_player_obj(self.get_current_player())):
+            return False
+        #   If the to_location has another of the current player's pieces
+        if not self.skipping_turn(from_location, to_location) and \
+                self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
+            return False
+
+        if not self.skipping_turn(from_location, to_location):
+            # If the indicated move is not legal due to movement rules of piece (valid_move method)
+
+            #   If the indicated move is blocked by another piece (get spots to check from move_conditions - may rename)
+            #       Use the cartesian to algebraic method
+            #       Run through both players and see if they have a piece in those spots
+            #           If they do, return false
+
         #   If the indicated move is not legal due to placing the player's general in check (test_move method)
 
         # Otherwise:
@@ -609,16 +701,10 @@ class JanggiGame:
         #   Update the game state as necessary (by assessing for checkmate, as necessary, via checkmate_detected)
         #   Update whose turn it is
         #   Return True
-
-        pass
+        return True
 
 
 JG = JanggiGame()
 print(JG.get_game_state())
 JG.get_game_board().print_game_board()
-for each_piece in JG.get_red_player().get_red_pieces():
-    print(JG.get_red_player().get_red_pieces()[each_piece].get_nickname())
-for each_piece in JG.get_red_player().get_red_pieces():
-    print(JG.get_red_player().get_red_pieces()[each_piece].get_piece_type())
-for each_piece in JG.get_red_player().get_red_pieces():
-    print(JG.get_red_player().get_red_pieces()[each_piece].get_location())
+print(JG.make_move('a4', 'a7'))
