@@ -910,6 +910,7 @@ class JanggiGame:
         # if there's a player that will be captured, change their location to 'CAPTURED'
         for piece in self.get_player_obj('blue').get_pieces():
             if piece.get_location() == temp_to_location:
+                other_piece = True
                 opponent_piece = piece
                 piece.set_location('CAPTURED')
 
@@ -918,12 +919,14 @@ class JanggiGame:
 
         piece_color = current_piece.get_color()
         if self.is_in_check(piece_color):
-            opponent_piece.set_location(temp_to_location)
             current_piece.set_location(from_location)
+            if other_piece:
+                opponent_piece.set_location(temp_to_location)
             return False
         else:
-            opponent_piece.set_location(temp_to_location)
             current_piece.set_location(from_location)
+            if other_piece:
+                opponent_piece.set_location(temp_to_location)
             return True
 
     def is_in_check(self, player_color):
