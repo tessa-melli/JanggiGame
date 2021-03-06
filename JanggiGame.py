@@ -627,22 +627,22 @@ class BluePlayer:
 
     def __init__(self):
         """Initializes the blue player's pieces"""
-        self._blue_pieces = [General('e9', 'BLUE', ' BGen ', -1),
-                             Guard('d10', 'BLUE', ' BGd1 ', -1),
-                             Guard('f10', 'BLUE', ' BGd2 ', -1),
-                             Horse('c10', 'BLUE', ' BHs1 '),
-                             Horse('h10', 'BLUE', ' BHs2 '),
-                             Elephant('b10', 'BLUE', ' BEl1 '),
-                             Elephant('g10', 'BLUE', ' BEl2 '),
-                             Chariot('a10', 'BLUE', ' BCh1 '),
-                             Chariot('i10', 'BLUE', ' BCh2 '),
-                             Cannon('b8', 'BLUE', ' BCn1 '),
-                             Cannon('h8', 'BLUE', ' BCn2 '),
-                             Soldier('a7', 'BLUE', ' BSr1 ', -1),
-                             Soldier('c7', 'BLUE', ' BSr2 ', -1),
-                             Soldier('e7', 'BLUE', ' BSr3 ', -1),
-                             Soldier('g7', 'BLUE', ' BSr4 ', -1),
-                             Soldier('i7', 'BLUE', ' BSr5 ', -1)]
+        self._blue_pieces = [General('e9', 'blue', ' BGen ', -1),
+                             Guard('d10', 'blue', ' BGd1 ', -1),
+                             Guard('f10', 'blue', ' BGd2 ', -1),
+                             Horse('c10', 'blue', ' BHs1 '),
+                             Horse('h10', 'blue', ' BHs2 '),
+                             Elephant('b10', 'blue', ' BEl1 '),
+                             Elephant('g10', 'blue', ' BEl2 '),
+                             Chariot('a10', 'blue', ' BCh1 '),
+                             Chariot('i10', 'blue', ' BCh2 '),
+                             Cannon('b8', 'blue', ' BCn1 '),
+                             Cannon('h8', 'blue', ' BCn2 '),
+                             Soldier('a7', 'blue', ' BSr1 ', -1),
+                             Soldier('c7', 'blue', ' BSr2 ', -1),
+                             Soldier('e7', 'blue', ' BSr3 ', -1),
+                             Soldier('g7', 'blue', ' BSr4 ', -1),
+                             Soldier('i7', 'blue', ' BSr5 ', -1)]
 
     def get_pieces(self):
         """
@@ -659,22 +659,22 @@ class RedPlayer:
 
     def __init__(self):
         """Initializes the red player's pieces"""
-        self._red_pieces = [General('e2', 'RED', ' RGen ', 1),
-                            Guard('d1', 'RED', ' RGd1 ', 1),
-                            Guard('f1', 'RED', ' RGd2 ', 1),
-                            Horse('c1', 'RED', ' RHs1 '),
-                            Horse('h1', 'RED', ' RHs2 '),
-                            Elephant('b1', 'RED', ' REl1 '),
-                            Elephant('g1', 'RED', ' REl2 '),
-                            Chariot('a1', 'RED', ' RCh1 '),
-                            Chariot('i1', 'RED', ' RCh2 '),
-                            Cannon('b3', 'RED', ' RCn1 '),
-                            Cannon('h3', 'RED', ' RCn2 '),
-                            Soldier('a4', 'RED', ' RSr1 ', 1),
-                            Soldier('c4', 'RED', ' RSr2 ', 1),
-                            Soldier('e4', 'RED', ' RSr3 ', 1),
-                            Soldier('g4', 'RED', ' RSr4 ', 1),
-                            Soldier('i4', 'RED', ' RSr5 ', 1)]
+        self._red_pieces = [General('e2', 'red', ' RGen ', 1),
+                            Guard('d1', 'red', ' RGd1 ', 1),
+                            Guard('f1', 'red', ' RGd2 ', 1),
+                            Horse('c1', 'red', ' RHs1 '),
+                            Horse('h1', 'red', ' RHs2 '),
+                            Elephant('b1', 'red', ' REl1 '),
+                            Elephant('g1', 'red', ' REl2 '),
+                            Chariot('a1', 'red', ' RCh1 '),
+                            Chariot('i1', 'red', ' RCh2 '),
+                            Cannon('b3', 'red', ' RCn1 '),
+                            Cannon('h3', 'red', ' RCn2 '),
+                            Soldier('a4', 'red', ' RSr1 ', 1),
+                            Soldier('c4', 'red', ' RSr2 ', 1),
+                            Soldier('e4', 'red', ' RSr3 ', 1),
+                            Soldier('g4', 'red', ' RSr4 ', 1),
+                            Soldier('i4', 'red', ' RSr5 ', 1)]
 
     def get_pieces(self):
         """
@@ -694,7 +694,7 @@ class JanggiGame:
         Initializes the game of Janggi
         """
         self._game_state = 'UNFINISHED'
-        self._current_player = 'BLUE'
+        self._current_player = 'blue'
         self._current_piece = None
         self._game_board = GameBoard()
         self._blue_player = BluePlayer()
@@ -760,9 +760,17 @@ class JanggiGame:
         :return: the Player object corresponding to the player color
         """
 
-        if player_color == 'BLUE':
+        if player_color == 'blue':
             return self._blue_player
-        elif player_color == 'RED':
+        elif player_color == 'red':
+            return self._red_player
+        else:
+            return False
+
+    def get_opposite_player(self, player_color):
+        if player_color == 'red':
+            return self._blue_player
+        elif player_color == 'blue':
             return self._red_player
         else:
             return False
@@ -836,35 +844,35 @@ class JanggiGame:
                 return True
         return False
 
-    def move_is_blocked(self):
+    def move_is_blocked(self, current_piece):
         """"""
         # if the piece type is a 'HORSE', 'ELEPHANT', or 'CHARIOT'
-        if (self.get_current_piece().get_piece_type() == 'HORSE' or
-            self.get_current_piece().get_piece_type() == 'ELEPHANT' or
-            self.get_current_piece().get_piece_type() == 'CHARIOT') and \
-                len(self.get_current_piece().get_intermediate_locations()) != 0:
+        if (current_piece.get_piece_type() == 'HORSE' or
+            current_piece.get_piece_type() == 'ELEPHANT' or
+            current_piece.get_piece_type() == 'CHARIOT') and \
+                len(current_piece.get_intermediate_locations()) != 0:
             # conditions for HORSE, ELEPHANT, or 'CHARIOT'
-            for intermediate_location in self.get_current_piece().get_intermediate_locations():
-                for red_piece in self.get_player_obj('RED').get_pieces():
+            for intermediate_location in current_piece.get_intermediate_locations():
+                for red_piece in self.get_player_obj('red').get_pieces():
                     if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
                         return True
-                for blue_piece in self.get_player_obj('BLUE').get_pieces():
+                for blue_piece in self.get_player_obj('blue').get_pieces():
                     if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
                         return True
         # if the piece type is a 'CANNON'
-        elif self.get_current_piece().get_piece_type() == 'CANNON':
-            if len(self.get_current_piece().get_intermediate_locations()) == 0:
+        elif current_piece.get_piece_type() == 'CANNON':
+            if len(current_piece.get_intermediate_locations()) == 0:
                 return True
             else:
                 intermediate_pieces = 0
-                for intermediate_location in self.get_current_piece().get_intermediate_locations():
-                    for red_piece in self.get_player_obj('RED').get_pieces():
+                for intermediate_location in current_piece.get_intermediate_locations():
+                    for red_piece in self.get_player_obj('red').get_pieces():
                         if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
                             if red_piece.get_piece_type() == 'CANNON':
                                 return True
                             else:
                                 intermediate_pieces += 1
-                    for blue_piece in self.get_player_obj('BLUE').get_pieces():
+                    for blue_piece in self.get_player_obj('blue').get_pieces():
                         if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
                             if blue_piece.get_piece_type() == 'CANNON':
                                 return True
@@ -876,19 +884,19 @@ class JanggiGame:
         else:
             return False
 
-    def cannon_capturing_cannon(self, to_location):
+    def cannon_capturing_cannon(self, current_piece, to_location):
         """"""
-        if self.get_current_piece().get_piece_type() == 'CANNON':
-            for blue_piece in self.get_player_obj('BLUE').get_pieces():
+        if current_piece.get_piece_type() == 'CANNON':
+            for blue_piece in self.get_player_obj('blue').get_pieces():
                 if blue_piece.get_location() == to_location and blue_piece.get_piece_type() == 'CANNON':
                     return True
-            for red_piece in self.get_player_obj('RED').get_pieces():
+            for red_piece in self.get_player_obj('red').get_pieces():
                 if red_piece.get_location() == to_location and red_piece.get_piece_type() == 'CANNON':
                     return True
         else:
             return False
 
-    def test_move(self, from_location, temp_to_location):
+    def test_move(self, current_piece, from_location, temp_to_location):
         """
         Temporarily moves a players piece to a new location so is_in_check can be called to assess if the move
         resulted in the general being put in or staying in check
@@ -899,32 +907,43 @@ class JanggiGame:
         """
         pass
 
-        # figure out which player is at the from_location
-        # change their location to the temp_to_location
-        # call is_in_check
-            # if True:
-                # put player location back to from_location
-                # Return False
-            # if False
-                # put player location back to from_location (will be updated back in make_move)
-                # Return True
+        # if there's a player that will be captured, change their location to 'CAPTURED'
+        for piece in self.get_player_obj('blue').get_pieces():
+            if piece.get_location() == temp_to_location:
+                opponent_piece = piece
+                piece.set_location('CAPTURED')
 
-    def is_in_check(self, player):
+        # change the current piece's location to the temp_to_location
+        current_piece.set_location(temp_to_location)
+
+        piece_color = current_piece.get_color()
+        if self.is_in_check(piece_color):
+            opponent_piece.set_location(temp_to_location)
+            current_piece.set_location(from_location)
+            return False
+        else:
+            opponent_piece.set_location(temp_to_location)
+            current_piece.set_location(from_location)
+            return True
+
+    def is_in_check(self, player_color):
         """
         Determines if the player is in check
-        :param player: 'red' or 'blue' for player being assessed for a checkmate
+        :param player_color: 'red' or 'blue' for player being assessed for a checkmate
         :return: True - if the player is in check
                  False - if the player is not in check
         """
 
         # find location of player's general
+        general_location = self.get_player_obj(player_color).get_pieces()[0].get_location()
         # for each of alternate player's pieces:
-        # !!!!!!!!!!!!! Need to see if all of these methods are arbitrary enough to run w/out specifics!!!!!!!!!!!!!!!
-        #   run cannon_capturing_cannon
-        #   run valid_move (piece_location, general_location)
-        #   run move_is_blocked
-        #   if any pieces result in a possible move to capture the general, return True
-        #   if you get through all of the pieces and none of them can, return False
+        for opponent in self.get_opposite_player(player_color).get_pieces():
+            if opponent.valid_move(self.algebraic_to_cartesian(opponent.get_location()),
+                                   self.algebraic_to_cartesian(general_location)) and \
+                    not self.move_is_blocked(self.get_current_piece()):
+                return True
+
+        return False
 
     def checkmate_detected(self, player):
         """
@@ -967,23 +986,35 @@ class JanggiGame:
                                                        self.algebraic_to_cartesian(to_location)):
                 return False
             # if the move is blocked by another piece in the movement path
-            if self.move_is_blocked():
+            if self.move_is_blocked(self.get_current_piece()):
                 return False
             # if a cannon is attempting to capture another cannon
-            if self.cannon_capturing_cannon(to_location):
+            if self.cannon_capturing_cannon(self.get_current_piece(), to_location):
                 return False
+        if not self.test_move(self.get_current_piece(), from_location, to_location):
+            return False
 
-        # test move method
-            # run is_in_check w/in test move method
+        #   Make the indicated move
+        self.get_current_piece().set_location(to_location)
 
-        #   If the indicated move is not legal due to placing the player's general in check (test_move method)
+        # UPDATE THE GAME BOARD
 
-        # Otherwise:
-        #   Make the indicated move (w/in the Piece objects and on the game board)
-        #   Remove any captured piece (by updating piece location of opponent to 'CAPTURED')
-        #   Assess if the other player's piece is in check by any # of current pieces (via is_in_check method)
-        #   Update the game state as necessary (by assessing for checkmate, as necessary, via checkmate_detected)
-        #   Update whose turn it is
+        for other_pieces in self.get_opposite_player(self.get_current_player()).get_pieces():
+            if other_pieces.get_location() == to_location:
+                other_pieces.set_location('CAPTURED')
+
+        # conditions if current player is blue
+        if self.get_current_player() == 'blue':
+            self.set_current_player('red')
+            if self.is_in_check(self.get_current_player()):
+                if self.checkmate_detected(self.get_current_player()):
+                    self.set_game_state('BLUE_WON')
+        # conditions if current player is red
+        else:
+            self.set_current_player('blue')
+            if self.is_in_check(self.get_current_player()):
+                if self.checkmate_detected(self.get_current_player()):
+                    self.set_game_state('RED_WON')
         return True
 
 
