@@ -125,7 +125,7 @@ class General(Piece):
             return False
 
         # if in one of the corners or in the center position:
-        if from_cartesian in self.get_palace(self.get_directionality())[0:4]:
+        if from_cartesian in self.get_palace(self.get_directionality())[0:5]:
             if not (abs(from_cartesian[0] - to_cartesian[0]) <= 1 and abs(from_cartesian[1] - to_cartesian[1]) <= 1):
                 return False
         # if currently on one of the 4 side positions
@@ -179,7 +179,7 @@ class Guard(Piece):
         if to_cartesian not in self.get_palace(self.get_directionality()):
             return False
         # if in one of the corners or in the center position:
-        if from_cartesian in self.get_palace(self.get_directionality())[0:4]:
+        if from_cartesian in self.get_palace(self.get_directionality())[0:5]:
             if not (abs(from_cartesian[0] - to_cartesian[0]) <= 1 and abs(from_cartesian[1] - to_cartesian[1]) <= 1):
                 return False
         # if currently on one of the 4 side positions
@@ -402,7 +402,7 @@ class Chariot(Piece):
                     self.add_intermediate_location([to_cartesian[0], vertical_index])
             return True
         # if moving from one of the corners or the center of one of the palaces
-        elif from_cartesian in self.get_palace(1)[0:4] or from_cartesian in self.get_palace(-1)[0:4]:
+        elif from_cartesian in self.get_palace(1)[0:5] or from_cartesian in self.get_palace(-1)[0:5]:
             # trying to not move in a straight line from the palace to outside the palace
             if not (to_cartesian in self.get_palace(1) or to_cartesian in self.get_palace(-1)):
                 return False
@@ -495,7 +495,7 @@ class Cannon(Piece):
                     self.add_intermediate_location([to_cartesian[0], column_index])
             return True
         # if moving from one of the corners or the center of one of the palaces
-        elif from_cartesian in self.get_palace(1)[0:4] or from_cartesian in self.get_palace(-1)[0:4]:
+        elif from_cartesian in self.get_palace(1)[0:5] or from_cartesian in self.get_palace(-1)[0:5]:
             # trying to not move in a straight line from the palace to outside the palace
             if not (to_cartesian in self.get_palace(1) or to_cartesian in self.get_palace(-1)):
                 return False
@@ -561,7 +561,7 @@ class Soldier(Piece):
             return False
 
         # if in diagonals or center of palace:
-        if from_cartesian in self.get_palace(1)[0:4] or from_cartesian in self.get_palace(-1)[0:4]:
+        if from_cartesian in self.get_palace(1)[0:5] or from_cartesian in self.get_palace(-1)[0:5]:
             # add ability to go diagonally
             if abs(to_cartesian[0] - from_cartesian[0]) + abs(to_cartesian[1] - from_cartesian[1]) > 2:
                 return False
@@ -958,7 +958,12 @@ class JanggiGame:
             return True
 
     def valid_move(self, from_location, to_location):
-        """"""
+        """
+
+        :param from_location:
+        :param to_location:
+        :return:
+        """
         # If the to_location has another of the current player's pieces
         if not self.skipping_turn(from_location, to_location) and \
                 self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
@@ -977,6 +982,8 @@ class JanggiGame:
                 return False
         if not self.test_move(self.get_current_piece(), from_location, to_location):
             return False
+
+        return True
 
     def checkmate_detected(self, player):
         """
