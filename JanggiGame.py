@@ -943,10 +943,11 @@ class JanggiGame:
         general_location = self.get_player_obj(player_color).get_pieces()[0].get_location()
         # for each of alternate player's pieces:
         for opponent in self.get_opposite_player(player_color).get_pieces():
-            if opponent.valid_move(self.algebraic_to_cartesian(opponent.get_location()),
-                                   self.algebraic_to_cartesian(general_location)) and \
-                    not self.move_is_blocked(self.get_current_piece()):
-                return True
+            if opponent.get_location() != 'CAPTURED':
+                if opponent.valid_move(self.algebraic_to_cartesian(opponent.get_location()),
+                                       self.algebraic_to_cartesian(general_location)) and \
+                        not self.move_is_blocked(self.get_current_piece()):
+                    return True
 
         return False
 
