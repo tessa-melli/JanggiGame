@@ -98,8 +98,6 @@ class General(Piece):
         self._piece_type = 'GENERAL'
         self._directionality = directionality
 
-
-
     def get_piece_type(self):
         """
         Getter method for the piece type
@@ -114,21 +112,20 @@ class General(Piece):
         """
         return self._directionality
 
-    def valid_move(self, from_cartesian, to_cartesian, directionality):
+    def valid_move(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
         :param to_cartesian:
-        :param directionality:
         :return:
         """
 
         # Trying to move guard out of the palace
-        if to_cartesian not in self.get_palace(directionality):
+        if to_cartesian not in self.get_palace(self.get_directionality()):
             return False
 
         # if in one of the corners or in the center position:
-        if from_cartesian in self.get_palace(directionality)[0:4]:
+        if from_cartesian in self.get_palace(self.get_directionality())[0:4]:
             if not (abs(from_cartesian[0] - to_cartesian[0]) <= 1 and abs(from_cartesian[1] - to_cartesian[1]) <= 1):
                 return False
         # if currently on one of the 4 side positions
@@ -137,6 +134,7 @@ class General(Piece):
                 return False
 
         return True
+
 
 class Guard(Piece):
     """
@@ -169,21 +167,19 @@ class Guard(Piece):
         """
         return self._directionality
 
-    def valid_move(self, from_cartesian, to_cartesian, directionality):
+    def valid_move(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
         :param to_cartesian:
-        :param directionality:
         :return:
         """
 
         # Trying to move guard out of the palace
-        if to_cartesian not in self.get_palace(directionality):
+        if to_cartesian not in self.get_palace(self.get_directionality()):
             return False
-
         # if in one of the corners or in the center position:
-        if from_cartesian in self.get_palace(directionality)[0:4]:
+        if from_cartesian in self.get_palace(self.get_directionality())[0:4]:
             if not (abs(from_cartesian[0] - to_cartesian[0]) <= 1 and abs(from_cartesian[1] - to_cartesian[1]) <= 1):
                 return False
         # if currently on one of the 4 side positions
@@ -208,11 +204,7 @@ class Horse(Piece):
         """
         super().__init__(location, color, nickname)
         self._piece_type = 'HORSE'
-
-        self._move_conditions = []
-        # TBD data structure that will hold move conditions for the horse piece
-        #   moves one step orthogonally, then one step diagonally outward
-        #   no jumping (can be blocked - up to 2 spots)
+        self._intermediate_locations = []
 
     def get_piece_type(self):
         """
@@ -221,12 +213,46 @@ class Horse(Piece):
         """
         return self._piece_type
 
-    def get_move_conditions(self):
+    def get_intermediate_locations(self):
         """
-        Getter method for the Horse move conditions
-        :return: move conditions for the Horse
+
+        :return:
         """
-        return self._move_conditions
+        return self._intermediate_locations
+
+    def add_intermediate_location(self, new_location):
+        """
+
+        :param new_location:
+        :return:
+        """
+        self._intermediate_locations.append(new_location)
+
+    def clear_intermediate_locations(self):
+        """
+
+        :return:
+        """
+        self._intermediate_locations.clear()
+
+    def valid_move(self, from_cartesian, to_cartesian):
+        """
+
+        :param from_cartesian:
+        :param to_cartesian:
+        :return:
+        """
+
+        self.clear_intermediate_locations()
+
+        if abs(from_cartesian[0] - to_cartesian[0]) == 2 and abs(from_cartesian[1] - to_cartesian[1]) == 1:
+            self.add_intermediate_location([(from_cartesian[0]+to_cartesian[0])/2, from_cartesian[1]])
+            return True
+        elif abs(from_cartesian[1] - to_cartesian[1]) == 2 and abs(from_cartesian[0] - to_cartesian[0]) == 1:
+            self.add_intermediate_location([])
+            return True
+        else:
+            return False
 
 
 class Elephant(Piece):
@@ -243,12 +269,7 @@ class Elephant(Piece):
         """
         super().__init__(location, color, nickname)
         self._piece_type = 'ELEPHANT'
-
-        self._move_conditions = []
-        # TBD data structure that will hold move conditions for the Elephant piece
-        #   move one point orthogonally followed by two points diagonally
-        #   blocked by any intervening pieces (up to 3 spots)
-        #   can choose to skip turn (as long as General is not already in check)
+        self._intermediate_locations = []
 
     def get_piece_type(self):
         """
@@ -257,12 +278,56 @@ class Elephant(Piece):
         """
         return self._piece_type
 
-    def get_move_conditions(self):
+    def get_intermediate_locations(self):
         """
-        Getter method for the Elephant move conditions
-        :return: move conditions for the Elephant
+
+        :return:
         """
-        return self._move_conditions
+        return self._intermediate_locations
+
+    def add_intermediate_location(self, new_location):
+        """
+
+        :param new_location:
+        :return:
+        """
+        self._intermediate_locations.append(new_location)
+
+    def clear_intermediate_locations(self):
+        """
+
+        :return:
+        """
+        self._intermediate_locations.clear()
+
+    def valid_move(self, from_cartesian, to_cartesian):
+        """
+
+        :param from_cartesian:
+        :param to_cartesian:
+        :return:
+        """
+
+        self.clear_intermediate_locations()
+
+        if from_cartesian[0] - to_cartesian[0] == 3 and abs(from_cartesian[1] - to_cartesian[1]) == 2:
+            self.add_intermediate_location([from_cartesian[0] - 1, from_cartesian[1]])
+            self.add_intermediate_location([from_cartesian[0] - 2, (from_cartesian[1] + to_cartesian[1])/2])
+            return True
+        elif (from_cartesian[0] - to_cartesian[0]) == -3 and abs(from_cartesian[1] - to_cartesian[1]) == 2:
+            self.add_intermediate_location([from_cartesian[0] + 1, from_cartesian[1]])
+            self.add_intermediate_location([from_cartesian[0] + 2, (from_cartesian[1] + to_cartesian[1])/2])
+            return True
+        elif abs(from_cartesian[0] - to_cartesian[0]) == 2 and from_cartesian[1] - to_cartesian[1] == 3:
+            self.add_intermediate_location([from_cartesian[0], from_cartesian[1] - 1])
+            self.add_intermediate_location([(from_cartesian[0] + to_cartesian[0]) / 2, from_cartesian[1] - 2])
+            return True
+        elif abs(from_cartesian[0] - to_cartesian[0]) == 2 and from_cartesian[1] - to_cartesian[1] == -3:
+            self.add_intermediate_location([from_cartesian[0], from_cartesian[1] + 1])
+            self.add_intermediate_location([(from_cartesian[0] + to_cartesian[0]) / 2, from_cartesian[1] + 2])
+            return True
+        else:
+            return False
 
 
 class Chariot(Piece):
@@ -279,12 +344,7 @@ class Chariot(Piece):
         """
         super().__init__(location, color, nickname)
         self._piece_type = 'CHARIOT'
-
-        self._move_conditions = []
-        # TBD data structure that will hold move conditions for the Chariot piece
-        #   moves and captures in a straight line (horizontally or vertically)
-        #   may move along diagonal lines inside either palace
-        #   can choose to skip turn (as long as General is not already in check)
+        self._intermediate_locations = []
 
     def get_piece_type(self):
         """
@@ -293,12 +353,74 @@ class Chariot(Piece):
         """
         return self._piece_type
 
-    def get_move_conditions(self):
+    def get_intermediate_locations(self):
         """
-        Getter method for the Chariot move conditions
-        :return: move conditions for the Chariot
+
+        :return:
         """
-        return self._move_conditions
+        return self._intermediate_locations
+
+    def add_intermediate_location(self, new_location):
+        """
+
+        :param new_location:
+        :return:
+        """
+        self._intermediate_locations.append(new_location)
+
+    def clear_intermediate_locations(self):
+        """
+
+        :return:
+        """
+        self._intermediate_locations.clear()
+
+    def valid_move(self, from_cartesian, to_cartesian):
+        """
+
+        :param from_cartesian:
+        :param to_cartesian:
+        :return:
+        """
+
+        # if moving in a straight line vertically
+        if abs(from_cartesian[0] - to_cartesian[0]) > 0 and from_cartesian[1] - to_cartesian[1] == 0:
+            # moving in the direction of decreasing rows
+            if from_cartesian[0] > to_cartesian[0]:
+                for horizontal_index in range(to_cartesian[0] + 1, from_cartesian[0]):
+                    self.add_intermediate_location([horizontal_index, to_cartesian[1]])
+            # moving in the direction of increasing rows
+            else:
+                for horizontal_index in range(from_cartesian[0] + 1, to_cartesian[0]):
+                    self.add_intermediate_location([horizontal_index, to_cartesian[1]])
+            return True
+        # if moving in a straight line horizontally
+        elif from_cartesian[0] - to_cartesian[0] == 0 and abs(from_cartesian[1] - to_cartesian[1]) > 0:
+            # moving in order of decreasing columns
+            if from_cartesian[1] > to_cartesian[0]:
+                for vertical_index in range(to_cartesian[1] + 1, from_cartesian[1]):
+                    self.add_intermediate_location([to_cartesian[0], vertical_index])
+            # moving in order of increasing columns
+            else:
+                for vertical_index in range(from_cartesian[1] + 1, to_cartesian[1]):
+                    self.add_intermediate_location([to_cartesian[0], vertical_index])
+            return True
+        # if moving from one of the corners or the center of one of the palaces
+        elif from_cartesian in self.get_palace(1)[0:4] or from_cartesian in self.get_palace(-1)[0:4]:
+            # trying to not move in a straight line from the palace to outside the palace
+            if not (to_cartesian in self.get_palace(1) or to_cartesian in self.get_palace(-1)):
+                return False
+            # not moving along the diagonal line in the palace
+            if abs(from_cartesian[0] - to_cartesian[0]) != abs(from_cartesian[1] - to_cartesian[1]):
+                return False
+            # if moving to opposite corner of the palace
+            if abs(from_cartesian[0] - to_cartesian[0]) == 2:
+                self.add_intermediate_location(
+                    [(from_cartesian[0] + to_cartesian[0])/2, (from_cartesian[1] + to_cartesian[1])])
+        else:
+            return False
+
+        return True
 
 
 class Cannon(Piece):
@@ -315,14 +437,7 @@ class Cannon(Piece):
         """
         super().__init__(location, color, nickname)
         self._piece_type = 'CANNON'
-
-        self._move_conditions = []
-        # TBD data structure that will hold move conditions for the Cannon piece
-        #   moves by jumping another piece horizontally or vertically
-        #   must be exactly one piece (friendly or otherwise) between from & to position
-        #   cannot jump over or capture another cannon
-        #   can jump diagonally w/in the palace
-        #   can choose to skip turn (as long as General is not already in check)
+        self._intermediate_locations = []
 
     def get_piece_type(self):
         """
@@ -331,12 +446,74 @@ class Cannon(Piece):
         """
         return self._piece_type
 
-    def get_move_conditions(self):
+    def get_intermediate_locations(self):
         """
-        Getter method for the Cannon move conditions
-        :return: move conditions for the Cannon
+
+        :return:
         """
-        return self._move_conditions
+        return self._intermediate_locations
+
+    def add_intermediate_location(self, new_location):
+        """
+
+        :param new_location:
+        :return:
+        """
+        self._intermediate_locations.append(new_location)
+
+    def clear_intermediate_locations(self):
+        """
+
+        :return:
+        """
+        self._intermediate_locations.clear()
+
+    def valid_move(self, from_cartesian, to_cartesian):
+        """
+
+        :param from_cartesian:
+        :param to_cartesian:
+        :return:
+        """
+
+        # if moving in a straight line vertically
+        if abs(from_cartesian[0] - to_cartesian[0]) > 0 and from_cartesian[1] - to_cartesian[1] == 0:
+            # moving in the direction of decreasing rows
+            if from_cartesian[0] > to_cartesian[0]:
+                for horizontal_index in range(to_cartesian[0] + 1, from_cartesian[0]):
+                    self.add_intermediate_location([horizontal_index, to_cartesian[1]])
+            # moving in the direction of increasing rows
+            else:
+                for horizontal_index in range(from_cartesian[0] + 1, to_cartesian[0]):
+                    self.add_intermediate_location([horizontal_index, to_cartesian[1]])
+            return True
+        # if moving in a straight line horizontally
+        elif from_cartesian[0] - to_cartesian[0] == 0 and abs(from_cartesian[1] - to_cartesian[1]) > 0:
+            # moving in order of decreasing columns
+            if from_cartesian[1] > to_cartesian[0]:
+                for vertical_index in range(to_cartesian[1] + 1, from_cartesian[1]):
+                    self.add_intermediate_location([to_cartesian[0], vertical_index])
+            # moving in order of increasing columns
+            else:
+                for vertical_index in range(from_cartesian[1] + 1, to_cartesian[1]):
+                    self.add_intermediate_location([to_cartesian[0], vertical_index])
+            return True
+        # if moving from one of the corners or the center of one of the palaces
+        elif from_cartesian in self.get_palace(1)[0:4] or from_cartesian in self.get_palace(-1)[0:4]:
+            # trying to not move in a straight line from the palace to outside the palace
+            if not (to_cartesian in self.get_palace(1) or to_cartesian in self.get_palace(-1)):
+                return False
+            # not moving along the diagonal line in the palace
+            if abs(from_cartesian[0] - to_cartesian[0]) != abs(from_cartesian[1] - to_cartesian[1]):
+                return False
+            # if moving to opposite corner of the palace
+            if abs(from_cartesian[0] - to_cartesian[0]) == 2:
+                self.add_intermediate_location(
+                    [(from_cartesian[0] + to_cartesian[0]) / 2, (from_cartesian[1] + to_cartesian[1])])
+        else:
+            return False
+
+        return True
 
 
 class Soldier(Piece):
@@ -372,12 +549,11 @@ class Soldier(Piece):
         """
         return self._directionality
 
-    def valid_move(self, from_cartesian, to_cartesian, directionality):
+    def valid_move(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
         :param to_cartesian:
-        :param directionality:
         :return:
         """
 
@@ -385,7 +561,7 @@ class Soldier(Piece):
             return False
 
         if not (to_cartesian[0] - from_cartesian[0] == 0 or
-                directionality * (to_cartesian[0] - from_cartesian[0]) == 1):
+                self.get_directionality() * (to_cartesian[0] - from_cartesian[0]) == 1):
             return False
 
         # if in diagonals or center of palace:
@@ -451,22 +627,22 @@ class BluePlayer:
 
     def __init__(self):
         """Initializes the blue player's pieces"""
-        self._blue_pieces = {'BlueGeneral': General('e9', 'BLUE', ' BGen ', -1),
-                             'BlueGuard1': Guard('d10', 'BLUE', ' BGd1 ', -1),
-                             'BlueGuard2': Guard('f10', 'BLUE', ' BGd2 ', -1),
-                             'BlueHorse1': Horse('c10', 'BLUE', ' BHs1 '),
-                             'BlueHorse2': Horse('h10', 'BLUE', ' BHs2 '),
-                             'BlueElephant1': Elephant('b10', 'BLUE', ' BEl1 '),
-                             'BlueElephant2': Elephant('g10', 'BLUE', ' BEl2 '),
-                             'BlueChariot1': Chariot('a10', 'BLUE', ' BCh1 '),
-                             'BlueChariot2': Chariot('i10', 'BLUE', ' BCh2 '),
-                             'BlueCannon1': Cannon('b8', 'BLUE', ' BCn1 '),
-                             'BlueCannon2': Cannon('h8', 'BLUE', ' BCn2 '),
-                             'BlueSoldier1': Soldier('a7', 'BLUE', ' BSr1 ', -1),
-                             'BlueSoldier2': Soldier('c7', 'BLUE', ' BSr2 ', -1),
-                             'BlueSoldier3': Soldier('e7', 'BLUE', ' BSr3 ', -1),
-                             'BlueSoldier4': Soldier('g7', 'BLUE', ' BSr4 ', -1),
-                             'BlueSoldier5': Soldier('i7', 'BLUE', ' BSr5 ', -1)}
+        self._blue_pieces = [General('e9', 'BLUE', ' BGen ', -1),
+                             Guard('d10', 'BLUE', ' BGd1 ', -1),
+                             Guard('f10', 'BLUE', ' BGd2 ', -1),
+                             Horse('c10', 'BLUE', ' BHs1 '),
+                             Horse('h10', 'BLUE', ' BHs2 '),
+                             Elephant('b10', 'BLUE', ' BEl1 '),
+                             Elephant('g10', 'BLUE', ' BEl2 '),
+                             Chariot('a10', 'BLUE', ' BCh1 '),
+                             Chariot('i10', 'BLUE', ' BCh2 '),
+                             Cannon('b8', 'BLUE', ' BCn1 '),
+                             Cannon('h8', 'BLUE', ' BCn2 '),
+                             Soldier('a7', 'BLUE', ' BSr1 ', -1),
+                             Soldier('c7', 'BLUE', ' BSr2 ', -1),
+                             Soldier('e7', 'BLUE', ' BSr3 ', -1),
+                             Soldier('g7', 'BLUE', ' BSr4 ', -1),
+                             Soldier('i7', 'BLUE', ' BSr5 ', -1)]
 
     def get_pieces(self):
         """
@@ -483,22 +659,22 @@ class RedPlayer:
 
     def __init__(self):
         """Initializes the red player's pieces"""
-        self._red_pieces = {'RedGeneral': General('e2', 'RED', ' RGen ', 1),
-                            'RedGuard1': Guard('d1', 'RED', ' RGd1 ', 1),
-                            'RedGuard2': Guard('f1', 'RED', ' RGd2 ', 1),
-                            'RedHorse1': Horse('c1', 'RED', ' RHs1 '),
-                            'RedHorse2': Horse('h1', 'RED', ' RHs2 '),
-                            'RedElephant1': Elephant('b1', 'RED', ' REl1 '),
-                            'RedElephant2': Elephant('g1', 'RED', ' REl2 '),
-                            'RedChariot1': Chariot('a1', 'RED', ' RCh1 '),
-                            'RedChariot2': Chariot('i1', 'RED', ' RCh2 '),
-                            'RedCannon1': Cannon('b3', 'RED', ' RCn1 '),
-                            'RedCannon2': Cannon('h3', 'RED', ' RCn2 '),
-                            'RedSoldier1': Soldier('a4', 'RED', ' RSr1 ', 1),
-                            'RedSoldier2': Soldier('c4', 'RED', ' RSr2 ', 1),
-                            'RedSoldier3': Soldier('e4', 'RED', ' RSr3 ', 1),
-                            'RedSoldier4': Soldier('g4', 'RED', ' RSr4 ', 1),
-                            'RedSoldier5': Soldier('i4', 'RED', ' RSr5 ', 1)}
+        self._red_pieces = [General('e2', 'RED', ' RGen ', 1),
+                            Guard('d1', 'RED', ' RGd1 ', 1),
+                            Guard('f1', 'RED', ' RGd2 ', 1),
+                            Horse('c1', 'RED', ' RHs1 '),
+                            Horse('h1', 'RED', ' RHs2 '),
+                            Elephant('b1', 'RED', ' REl1 '),
+                            Elephant('g1', 'RED', ' REl2 '),
+                            Chariot('a1', 'RED', ' RCh1 '),
+                            Chariot('i1', 'RED', ' RCh2 '),
+                            Cannon('b3', 'RED', ' RCn1 '),
+                            Cannon('h3', 'RED', ' RCn2 '),
+                            Soldier('a4', 'RED', ' RSr1 ', 1),
+                            Soldier('c4', 'RED', ' RSr2 ', 1),
+                            Soldier('e4', 'RED', ' RSr3 ', 1),
+                            Soldier('g4', 'RED', ' RSr4 ', 1),
+                            Soldier('i4', 'RED', ' RSr5 ', 1)]
 
     def get_pieces(self):
         """
@@ -519,6 +695,7 @@ class JanggiGame:
         """
         self._game_state = 'UNFINISHED'
         self._current_player = 'BLUE'
+        self._current_piece = None
         self._game_board = GameBoard()
         self._blue_player = BluePlayer()
         self._red_player = RedPlayer()
@@ -554,6 +731,21 @@ class JanggiGame:
         """
         self._current_player = next_player
 
+    def get_current_piece(self):
+        """
+
+        :return:
+        """
+        return self._current_piece
+
+    def set_current_piece(self, current_piece):
+        """
+
+        :param current_piece:
+        :return:
+        """
+        self._current_piece = current_piece
+
     def get_game_board(self):
         """
         Getter method for the GameBoard object
@@ -588,7 +780,8 @@ class JanggiGame:
         :param algebraic_location: location in algebraic notation
         :return: the location in cartesian coordinates
         """
-        pass
+
+        return [int(algebraic_location[1]), self.get_letter_to_number()[algebraic_location[0]]]
 
     def cartesian_to_algebraic(self, cartesian_location):
         """
@@ -596,7 +789,14 @@ class JanggiGame:
         :param cartesian_location: location in cartesian coordinates (list of row and column indices)
         :return: the location in algebraic notation
         """
-        pass
+
+        column_letter = ''
+
+        for item in self.get_letter_to_number():
+            if self.get_letter_to_number()[item] == cartesian_location[1]:
+                column_letter = self.get_letter_to_number()[item]
+
+        return column_letter + str(cartesian_location[0])
 
     def moving_own_piece(self, from_location, player):
         """
@@ -607,7 +807,8 @@ class JanggiGame:
         """
 
         for each_piece in player.get_pieces():
-            if player.get_pieces()[each_piece].get_location() == from_location:
+            if each_piece.get_location() == from_location:
+                self.set_current_piece(each_piece)
                 return True
         return False
 
@@ -619,7 +820,7 @@ class JanggiGame:
         :return:
         """
         for each_piece in player.get_pieces():
-            if player.get_pieces()[each_piece].get_location() == to_location:
+            if each_piece.get_location() == to_location:
                 return True
         return False
 
@@ -683,14 +884,46 @@ class JanggiGame:
         if not self.skipping_turn(from_location, to_location) and \
                 self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
             return False
-
+        #   If the player is not skipping their turn
         if not self.skipping_turn(from_location, to_location):
-            # If the indicated move is not legal due to movement rules of piece (valid_move method)
+            # If a cannon is trying to capture a cannon
 
-            #   If the indicated move is blocked by another piece (get spots to check from move_conditions - may rename)
-            #       Use the cartesian to algebraic method
-            #       Run through both players and see if they have a piece in those spots
-            #           If they do, return false
+            # If the indicated move is not legal due to movement rules of piece (valid_move method)
+            if self.get_current_piece().valid_move(self.algebraic_to_cartesian(from_location),
+                                                   self.algebraic_to_cartesian(to_location)):
+                if (self.get_current_piece().get_piece_type() == 'HORSE' or
+                    self.get_current_piece().get_piece_type() == 'ELEPHANT' or
+                    self.get_current_piece().get_piece_type() == 'CHARIOT') and \
+                        len(self.get_current_piece().get_intermediate_locations()) != 0:
+                    # conditions for HORSE, ELEPHANT, or 'CHARIOT'
+                    for intermediate_location in self.get_current_piece().get_intermediate_locations():
+                        for red_piece in self.get_player_obj('RED').get_pieces():
+                            if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                                return False
+                        for blue_piece in self.get_player_obj('BLUE').get_pieces():
+                            if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                                return False
+                elif self.get_current_piece().get_piece_type() == 'CANNON':
+                    if len(self.get_current_piece().get_intermediate_locations()) == 0:
+                        return False
+                    else:
+                        intermediate_pieces = 0
+                        for intermediate_location in self.get_current_piece().get_intermediate_locations():
+                            for red_piece in self.get_player_obj('RED').get_pieces():
+                                if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                                    if red_piece.get_piece_type() == 'CANNON':
+                                        return False
+                                    else:
+                                        intermediate_pieces += 1
+                            for blue_piece in self.get_player_obj('BLUE').get_pieces():
+                                if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                                    if blue_piece.get_piece_type() == 'CANNON':
+                                        return False
+                                    else:
+                                        intermediate_pieces += 1
+                        if intermediate_pieces != 1:
+                            return False
+
 
         #   If the indicated move is not legal due to placing the player's general in check (test_move method)
 
