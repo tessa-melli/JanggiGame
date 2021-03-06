@@ -859,6 +859,8 @@ class JanggiGame:
                     if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
                         current_piece.clear_intermediate_locations()
                         return True
+            current_piece.clear_intermediate_locations()
+            return False
         # if the piece type is a 'CANNON'
         elif current_piece.get_piece_type() == 'CANNON':
             if len(current_piece.get_intermediate_locations()) == 0:
@@ -902,6 +904,26 @@ class JanggiGame:
         else:
             return False
 
+    def is_in_check(self, player_color):
+        """
+        Determines if the player is in check
+        :param player_color: 'red' or 'blue' for player being assessed for a checkmate
+        :return: True - if the player is in check
+                 False - if the player is not in check
+        """
+
+        # find location of player's general
+        general_location = self.get_player_obj(player_color).get_pieces()[0].get_location()
+        # for each of alternate player's pieces:
+        for opponent in self.get_opposite_player(player_color).get_pieces():
+            if opponent.get_location() != 'CAPTURED':
+                if opponent.valid_move(self.algebraic_to_cartesian(opponent.get_location()),
+                                       self.algebraic_to_cartesian(general_location)) and \
+                        not self.move_is_blocked(opponent):   # THIS IS NOT CORRECT
+                    return True
+
+        return False
+
     def test_move(self, current_piece, from_location, temp_to_location):
         """
         Temporarily moves a players piece to a new location so is_in_check can be called to assess if the move
@@ -934,26 +956,6 @@ class JanggiGame:
             if other_piece:
                 opponent_piece.set_location(temp_to_location)
             return True
-
-    def is_in_check(self, player_color):
-        """
-        Determines if the player is in check
-        :param player_color: 'red' or 'blue' for player being assessed for a checkmate
-        :return: True - if the player is in check
-                 False - if the player is not in check
-        """
-
-        # find location of player's general
-        general_location = self.get_player_obj(player_color).get_pieces()[0].get_location()
-        # for each of alternate player's pieces:
-        for opponent in self.get_opposite_player(player_color).get_pieces():
-            if opponent.get_location() != 'CAPTURED':
-                if opponent.valid_move(self.algebraic_to_cartesian(opponent.get_location()),
-                                       self.algebraic_to_cartesian(general_location)) and \
-                        not self.move_is_blocked(self.get_current_piece()):
-                    return True
-
-        return False
 
     def checkmate_detected(self, player):
         """
@@ -1011,7 +1013,7 @@ class JanggiGame:
 
         # UPDATE THE GAME BOARD
         self.get_game_board().modify_game_board(self.algebraic_to_cartesian(from_location)[0],
-                                                self.algebraic_to_cartesian(from_location)[1], '       ')
+                                                self.algebraic_to_cartesian(from_location)[1], '      ')
         self.get_game_board().modify_game_board(self.algebraic_to_cartesian(to_location)[0],
                                                 self.algebraic_to_cartesian(to_location)[1],
                                                 self.get_current_piece().get_nickname())
