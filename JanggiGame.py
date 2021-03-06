@@ -249,7 +249,7 @@ class Horse(Piece):
             self.add_intermediate_location([(from_cartesian[0]+to_cartesian[0])/2, from_cartesian[1]])
             return True
         elif abs(from_cartesian[1] - to_cartesian[1]) == 2 and abs(from_cartesian[0] - to_cartesian[0]) == 1:
-            self.add_intermediate_location([])
+            self.add_intermediate_location([from_cartesian[0], (from_cartesian[1] + to_cartesian[1])/2])
             return True
         else:
             return False
@@ -791,7 +791,7 @@ class JanggiGame:
         :return: the location in cartesian coordinates
         """
 
-        return [int(algebraic_location[1]), self.get_letter_to_number()[algebraic_location[0]]]
+        return [int(algebraic_location[1:]), self.get_letter_to_number()[algebraic_location[0]]]
 
     def cartesian_to_algebraic(self, cartesian_location):
         """
@@ -804,7 +804,7 @@ class JanggiGame:
 
         for item in self.get_letter_to_number():
             if self.get_letter_to_number()[item] == cartesian_location[1]:
-                column_letter = self.get_letter_to_number()[item]
+                column_letter = item
 
         return column_letter + str(cartesian_location[0])
 
@@ -907,7 +907,6 @@ class JanggiGame:
         :return: True - if the move has not resulted in the player's general being put in or remaining in check
                  False - if the move has resulted in the player's general being put in or remaining in check
         """
-        pass
 
         # if there's a player that will be captured, change their location to 'CAPTURED'
         other_piece = False
@@ -1024,3 +1023,13 @@ class JanggiGame:
                 if self.checkmate_detected(self.get_current_player()):
                     self.set_game_state('RED_WON')
         return True
+
+JG = JanggiGame()
+print(JG.make_move('c10', 'd8'))
+print(JG.get_current_piece())
+print(JG.make_move('c1', 'd3'))
+print(JG.get_current_piece()) # TEST move is doing something weird here
+
+
+print(JG.algebraic_to_cartesian('c10'))
+print(JG.cartesian_to_algebraic([10,3]))
