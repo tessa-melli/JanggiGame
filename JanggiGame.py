@@ -243,8 +243,6 @@ class Horse(Piece):
         :return:
         """
 
-        self.clear_intermediate_locations()
-
         if abs(from_cartesian[0] - to_cartesian[0]) == 2 and abs(from_cartesian[1] - to_cartesian[1]) == 1:
             self.add_intermediate_location([(from_cartesian[0]+to_cartesian[0])/2, from_cartesian[1]])
             return True
@@ -307,8 +305,6 @@ class Elephant(Piece):
         :param to_cartesian:
         :return:
         """
-
-        self.clear_intermediate_locations()
 
         if from_cartesian[0] - to_cartesian[0] == 3 and abs(from_cartesian[1] - to_cartesian[1]) == 2:
             self.add_intermediate_location([from_cartesian[0] - 1, from_cartesian[1]])
@@ -480,23 +476,23 @@ class Cannon(Piece):
         if abs(from_cartesian[0] - to_cartesian[0]) > 0 and from_cartesian[1] - to_cartesian[1] == 0:
             # moving in the direction of decreasing rows
             if from_cartesian[0] > to_cartesian[0]:
-                for horizontal_index in range(to_cartesian[0] + 1, from_cartesian[0]):
-                    self.add_intermediate_location([horizontal_index, to_cartesian[1]])
+                for row_index in range(to_cartesian[0] + 1, from_cartesian[0]):
+                    self.add_intermediate_location([row_index, to_cartesian[1]])
             # moving in the direction of increasing rows
             else:
-                for horizontal_index in range(from_cartesian[0] + 1, to_cartesian[0]):
-                    self.add_intermediate_location([horizontal_index, to_cartesian[1]])
+                for row_index in range(from_cartesian[0] + 1, to_cartesian[0]):
+                    self.add_intermediate_location([row_index, to_cartesian[1]])
             return True
         # if moving in a straight line horizontally
         elif from_cartesian[0] - to_cartesian[0] == 0 and abs(from_cartesian[1] - to_cartesian[1]) > 0:
             # moving in order of decreasing columns
-            if from_cartesian[1] > to_cartesian[0]:
-                for vertical_index in range(to_cartesian[1] + 1, from_cartesian[1]):
-                    self.add_intermediate_location([to_cartesian[0], vertical_index])
+            if from_cartesian[1] > to_cartesian[1]:
+                for column_index in range(to_cartesian[1] + 1, from_cartesian[1]):
+                    self.add_intermediate_location([to_cartesian[0], column_index])
             # moving in order of increasing columns
             else:
-                for vertical_index in range(from_cartesian[1] + 1, to_cartesian[1]):
-                    self.add_intermediate_location([to_cartesian[0], vertical_index])
+                for column_index in range(from_cartesian[1] + 1, to_cartesian[1]):
+                    self.add_intermediate_location([to_cartesian[0], column_index])
             return True
         # if moving from one of the corners or the center of one of the palaces
         elif from_cartesian in self.get_palace(1)[0:4] or from_cartesian in self.get_palace(-1)[0:4]:
@@ -857,9 +853,11 @@ class JanggiGame:
             for intermediate_location in current_piece.get_intermediate_locations():
                 for red_piece in self.get_player_obj('red').get_pieces():
                     if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                        current_piece.clear_intermediate_locations()
                         return True
                 for blue_piece in self.get_player_obj('blue').get_pieces():
                     if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                        current_piece.clear_intermediate_locations()
                         return True
         # if the piece type is a 'CANNON'
         elif current_piece.get_piece_type() == 'CANNON':
@@ -871,17 +869,23 @@ class JanggiGame:
                     for red_piece in self.get_player_obj('red').get_pieces():
                         if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
                             if red_piece.get_piece_type() == 'CANNON':
+                                current_piece.clear_intermediate_locations()
                                 return True
                             else:
                                 intermediate_pieces += 1
                     for blue_piece in self.get_player_obj('blue').get_pieces():
                         if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
                             if blue_piece.get_piece_type() == 'CANNON':
+                                current_piece.clear_intermediate_locations()
                                 return True
                             else:
                                 intermediate_pieces += 1
                 if intermediate_pieces != 1:
+                    current_piece.clear_intermediate_locations()
                     return True
+                else:
+                    current_piece.clear_intermediate_locations()
+                    return False
         # if the piece type is not an 'HORSE', 'ELEPHANT', 'CHARIOT', or 'CANNON'
         else:
             return False
@@ -1005,6 +1009,11 @@ class JanggiGame:
         #   Make the indicated move
         self.get_current_piece().set_location(to_location)
 
+        self.get_game_board().modify_game_board(self.algebraic_to_cartesian(from_location)[0],
+                                                self.algebraic_to_cartesian(from_location)[1], '     ')
+        self.get_game_board().modify_game_board(self.algebraic_to_cartesian(to_location)[0],
+                                                self.algebraic_to_cartesian(to_location)[1],
+                                                self.get_current_piece().get_nickname())
         # UPDATE THE GAME BOARD
 
         for other_pieces in self.get_opposite_player(self.get_current_player()).get_pieces():
@@ -1014,13 +1023,13 @@ class JanggiGame:
         # conditions if current player is blue
         if self.get_current_player() == 'blue':
             self.set_current_player('red')
-            if self.is_in_check(self.get_current_player()):
-                if self.checkmate_detected(self.get_current_player()):
-                    self.set_game_state('BLUE_WON')
+            # if self.is_in_check(self.get_current_player()):
+            #    if self.checkmate_detected(self.get_current_player()):
+            #        self.set_game_state('BLUE_WON')
         # conditions if current player is red
         else:
             self.set_current_player('blue')
-            if self.is_in_check(self.get_current_player()):
-                if self.checkmate_detected(self.get_current_player()):
-                    self.set_game_state('RED_WON')
+            # if self.is_in_check(self.get_current_player()):
+            #   if self.checkmate_detected(self.get_current_player()):
+            #        self.set_game_state('RED_WON')
         return True
