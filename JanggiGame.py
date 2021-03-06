@@ -1009,12 +1009,12 @@ class JanggiGame:
         #   Make the indicated move
         self.get_current_piece().set_location(to_location)
 
+        # UPDATE THE GAME BOARD
         self.get_game_board().modify_game_board(self.algebraic_to_cartesian(from_location)[0],
                                                 self.algebraic_to_cartesian(from_location)[1], '     ')
         self.get_game_board().modify_game_board(self.algebraic_to_cartesian(to_location)[0],
                                                 self.algebraic_to_cartesian(to_location)[1],
                                                 self.get_current_piece().get_nickname())
-        # UPDATE THE GAME BOARD
 
         for other_pieces in self.get_opposite_player(self.get_current_player()).get_pieces():
             if other_pieces.get_location() == to_location:
