@@ -244,10 +244,10 @@ class Horse(Piece):
         """
 
         if abs(from_cartesian[0] - to_cartesian[0]) == 2 and abs(from_cartesian[1] - to_cartesian[1]) == 1:
-            self.add_intermediate_location([(from_cartesian[0]+to_cartesian[0])/2, from_cartesian[1]])
+            self.add_intermediate_location([int((from_cartesian[0]+to_cartesian[0]) / 2), from_cartesian[1]])
             return True
         elif abs(from_cartesian[1] - to_cartesian[1]) == 2 and abs(from_cartesian[0] - to_cartesian[0]) == 1:
-            self.add_intermediate_location([from_cartesian[0], (from_cartesian[1] + to_cartesian[1])/2])
+            self.add_intermediate_location([from_cartesian[0], int((from_cartesian[1] + to_cartesian[1]) / 2)])
             return True
         else:
             return False
@@ -308,19 +308,19 @@ class Elephant(Piece):
 
         if from_cartesian[0] - to_cartesian[0] == 3 and abs(from_cartesian[1] - to_cartesian[1]) == 2:
             self.add_intermediate_location([from_cartesian[0] - 1, from_cartesian[1]])
-            self.add_intermediate_location([from_cartesian[0] - 2, (from_cartesian[1] + to_cartesian[1])/2])
+            self.add_intermediate_location([from_cartesian[0] - 2, int((from_cartesian[1] + to_cartesian[1]) / 2)])
             return True
         elif (from_cartesian[0] - to_cartesian[0]) == -3 and abs(from_cartesian[1] - to_cartesian[1]) == 2:
             self.add_intermediate_location([from_cartesian[0] + 1, from_cartesian[1]])
-            self.add_intermediate_location([from_cartesian[0] + 2, (from_cartesian[1] + to_cartesian[1])/2])
+            self.add_intermediate_location([from_cartesian[0] + 2, int((from_cartesian[1] + to_cartesian[1]) / 2)])
             return True
         elif abs(from_cartesian[0] - to_cartesian[0]) == 2 and from_cartesian[1] - to_cartesian[1] == 3:
             self.add_intermediate_location([from_cartesian[0], from_cartesian[1] - 1])
-            self.add_intermediate_location([(from_cartesian[0] + to_cartesian[0]) / 2, from_cartesian[1] - 2])
+            self.add_intermediate_location([int((from_cartesian[0] + to_cartesian[0]) / 2), from_cartesian[1] - 2])
             return True
         elif abs(from_cartesian[0] - to_cartesian[0]) == 2 and from_cartesian[1] - to_cartesian[1] == -3:
             self.add_intermediate_location([from_cartesian[0], from_cartesian[1] + 1])
-            self.add_intermediate_location([(from_cartesian[0] + to_cartesian[0]) / 2, from_cartesian[1] + 2])
+            self.add_intermediate_location([int((from_cartesian[0] + to_cartesian[0]) / 2), from_cartesian[1] + 2])
             return True
         else:
             return False
@@ -412,7 +412,7 @@ class Chariot(Piece):
             # if moving to opposite corner of the palace
             if abs(from_cartesian[0] - to_cartesian[0]) == 2:
                 self.add_intermediate_location(
-                    [(from_cartesian[0] + to_cartesian[0])/2, (from_cartesian[1] + to_cartesian[1])])
+                    [int((from_cartesian[0] + to_cartesian[0]) / 2), (from_cartesian[1] + to_cartesian[1])])
         else:
             return False
 
@@ -505,7 +505,7 @@ class Cannon(Piece):
             # if moving to opposite corner of the palace
             if abs(from_cartesian[0] - to_cartesian[0]) == 2:
                 self.add_intermediate_location(
-                    [(from_cartesian[0] + to_cartesian[0]) / 2, (from_cartesian[1] + to_cartesian[1])])
+                    [int((from_cartesian[0] + to_cartesian[0]) / 2), (from_cartesian[1] + to_cartesian[1])])
         else:
             return False
 
@@ -1011,7 +1011,7 @@ class JanggiGame:
 
         # UPDATE THE GAME BOARD
         self.get_game_board().modify_game_board(self.algebraic_to_cartesian(from_location)[0],
-                                                self.algebraic_to_cartesian(from_location)[1], '     ')
+                                                self.algebraic_to_cartesian(from_location)[1], '       ')
         self.get_game_board().modify_game_board(self.algebraic_to_cartesian(to_location)[0],
                                                 self.algebraic_to_cartesian(to_location)[1],
                                                 self.get_current_piece().get_nickname())
