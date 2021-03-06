@@ -812,18 +812,6 @@ class JanggiGame:
                 return True
         return False
 
-    def capturing_own_piece(self, to_location, player):
-        """
-
-        :param to_location:
-        :param player:
-        :return:
-        """
-        for each_piece in player.get_pieces():
-            if each_piece.get_location() == to_location:
-                return True
-        return False
-
     def skipping_turn(self, from_location, to_location):
         """
 
@@ -836,23 +824,69 @@ class JanggiGame:
         else:
             return False
 
-    def is_in_check(self, player):
+    def capturing_own_piece(self, to_location, player):
         """
-        Determines if the player is in check
-        :param player: 'red' or 'blue' for player being assessed for a checkmate
-        :return: True - if the player is in check
-                 False - if the player is not in check
-        """
-        pass
 
-    def checkmate_detected(self, player):
+        :param to_location:
+        :param player:
+        :return:
         """
-        Determines if a checkmate state has been reached
-        :param player: player to assess a checkmate for
-        :return: True - if the player's general is checkmated
-                 False - if the player's general has not been checkmated
-        """
-        pass
+        for each_piece in player.get_pieces():
+            if each_piece.get_location() == to_location:
+                return True
+        return False
+
+    def move_is_blocked(self):
+        """"""
+        # if the piece type is a 'HORSE', 'ELEPHANT', or 'CHARIOT'
+        if (self.get_current_piece().get_piece_type() == 'HORSE' or
+            self.get_current_piece().get_piece_type() == 'ELEPHANT' or
+            self.get_current_piece().get_piece_type() == 'CHARIOT') and \
+                len(self.get_current_piece().get_intermediate_locations()) != 0:
+            # conditions for HORSE, ELEPHANT, or 'CHARIOT'
+            for intermediate_location in self.get_current_piece().get_intermediate_locations():
+                for red_piece in self.get_player_obj('RED').get_pieces():
+                    if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                        return True
+                for blue_piece in self.get_player_obj('BLUE').get_pieces():
+                    if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                        return True
+        # if the piece type is a 'CANNON'
+        elif self.get_current_piece().get_piece_type() == 'CANNON':
+            if len(self.get_current_piece().get_intermediate_locations()) == 0:
+                return True
+            else:
+                intermediate_pieces = 0
+                for intermediate_location in self.get_current_piece().get_intermediate_locations():
+                    for red_piece in self.get_player_obj('RED').get_pieces():
+                        if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                            if red_piece.get_piece_type() == 'CANNON':
+                                return True
+                            else:
+                                intermediate_pieces += 1
+                    for blue_piece in self.get_player_obj('BLUE').get_pieces():
+                        if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
+                            if blue_piece.get_piece_type() == 'CANNON':
+                                return True
+                            else:
+                                intermediate_pieces += 1
+                if intermediate_pieces != 1:
+                    return True
+        # if the piece type is not an 'HORSE', 'ELEPHANT', 'CHARIOT', or 'CANNON'
+        else:
+            return False
+
+    def cannon_capturing_cannon(self, to_location):
+        """"""
+        if self.get_current_piece().get_piece_type() == 'CANNON':
+            for blue_piece in self.get_player_obj('BLUE').get_pieces():
+                if blue_piece.get_location() == to_location and blue_piece.get_piece_type() == 'CANNON':
+                    return True
+            for red_piece in self.get_player_obj('RED').get_pieces():
+                if red_piece.get_location() == to_location and red_piece.get_piece_type() == 'CANNON':
+                    return True
+        else:
+            return False
 
     def test_move(self, from_location, temp_to_location):
         """
@@ -865,6 +899,48 @@ class JanggiGame:
         """
         pass
 
+        # figure out which player is at the from_location
+        # change their location to the temp_to_location
+        # call is_in_check
+            # if True:
+                # put player location back to from_location
+                # Return False
+            # if False
+                # put player location back to from_location (will be updated back in make_move)
+                # Return True
+
+    def is_in_check(self, player):
+        """
+        Determines if the player is in check
+        :param player: 'red' or 'blue' for player being assessed for a checkmate
+        :return: True - if the player is in check
+                 False - if the player is not in check
+        """
+
+        # find location of player's general
+        # for each of alternate player's pieces:
+        # !!!!!!!!!!!!! Need to see if all of these methods are arbitrary enough to run w/out specifics!!!!!!!!!!!!!!!
+        #   run cannon_capturing_cannon
+        #   run valid_move (piece_location, general_location)
+        #   run move_is_blocked
+        #   if any pieces result in a possible move to capture the general, return True
+        #   if you get through all of the pieces and none of them can, return False
+
+    def checkmate_detected(self, player):
+        """
+        Determines if a checkmate state has been reached
+        :param player: player to assess a checkmate for
+        :return: True - if the player's general is checkmated
+                 False - if the player's general has not been checkmated
+        """
+
+        # Only runs if the is_in_check method returns true
+        # Whoever is in check, run through each piece and try to move them to each position on the board
+        # If any of these is a "valid" move, the test_move should be run to see if that got the player out of check
+        #   Test move should always put the piece back to its original location so it's not permanent due to a call here
+        #   If the player is out of check - return False
+        # Keep running through all possible moves, if none are found, return True
+
     def make_move(self, from_location, to_location):
         """
         Performs the move of the player's turn
@@ -874,56 +950,31 @@ class JanggiGame:
                  True - if the indicated move is performed
         """
 
-        #   If the game has already been won
+        # If the game has already been won
         if self.get_game_state() != 'UNFINISHED':
             return False
-        #   If the from_location does not have a current player's piece
+        # If the from_location does not have a current player's piece
         if not self.moving_own_piece(from_location, self.get_player_obj(self.get_current_player())):
             return False
-        #   If the to_location has another of the current player's pieces
+        # If the to_location has another of the current player's pieces
         if not self.skipping_turn(from_location, to_location) and \
                 self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
             return False
-        #   If the player is not skipping their turn
+        # If the player is not skipping their turn
         if not self.skipping_turn(from_location, to_location):
-            # If a cannon is trying to capture a cannon
+            # If the indicated move is not legal due to movement rules of piece
+            if not self.get_current_piece().valid_move(self.algebraic_to_cartesian(from_location),
+                                                       self.algebraic_to_cartesian(to_location)):
+                return False
+            # if the move is blocked by another piece in the movement path
+            if self.move_is_blocked():
+                return False
+            # if a cannon is attempting to capture another cannon
+            if self.cannon_capturing_cannon(to_location):
+                return False
 
-            # If the indicated move is not legal due to movement rules of piece (valid_move method)
-            if self.get_current_piece().valid_move(self.algebraic_to_cartesian(from_location),
-                                                   self.algebraic_to_cartesian(to_location)):
-                if (self.get_current_piece().get_piece_type() == 'HORSE' or
-                    self.get_current_piece().get_piece_type() == 'ELEPHANT' or
-                    self.get_current_piece().get_piece_type() == 'CHARIOT') and \
-                        len(self.get_current_piece().get_intermediate_locations()) != 0:
-                    # conditions for HORSE, ELEPHANT, or 'CHARIOT'
-                    for intermediate_location in self.get_current_piece().get_intermediate_locations():
-                        for red_piece in self.get_player_obj('RED').get_pieces():
-                            if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
-                                return False
-                        for blue_piece in self.get_player_obj('BLUE').get_pieces():
-                            if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
-                                return False
-                elif self.get_current_piece().get_piece_type() == 'CANNON':
-                    if len(self.get_current_piece().get_intermediate_locations()) == 0:
-                        return False
-                    else:
-                        intermediate_pieces = 0
-                        for intermediate_location in self.get_current_piece().get_intermediate_locations():
-                            for red_piece in self.get_player_obj('RED').get_pieces():
-                                if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
-                                    if red_piece.get_piece_type() == 'CANNON':
-                                        return False
-                                    else:
-                                        intermediate_pieces += 1
-                            for blue_piece in self.get_player_obj('BLUE').get_pieces():
-                                if blue_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
-                                    if blue_piece.get_piece_type() == 'CANNON':
-                                        return False
-                                    else:
-                                        intermediate_pieces += 1
-                        if intermediate_pieces != 1:
-                            return False
-
+        # test move method
+            # run is_in_check w/in test move method
 
         #   If the indicated move is not legal due to placing the player's general in check (test_move method)
 
@@ -933,7 +984,6 @@ class JanggiGame:
         #   Assess if the other player's piece is in check by any # of current pieces (via is_in_check method)
         #   Update the game state as necessary (by assessing for checkmate, as necessary, via checkmate_detected)
         #   Update whose turn it is
-        #   Return True
         return True
 
 
