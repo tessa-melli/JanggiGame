@@ -1021,5 +1021,3 @@ class JanggiGame:
                 if self.checkmate_detected(self.get_current_player()):
                     self.set_game_state('RED_WON')
         return True
-
-
