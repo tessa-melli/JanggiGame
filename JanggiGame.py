@@ -1011,6 +1011,8 @@ class JanggiGame:
                  True - if the indicated move is performed
         """
 
+        print("Attempting:" + from_location + "->" + to_location)
+
         # If the game has already been won
         if self.get_game_state() != 'UNFINISHED':
             return False
