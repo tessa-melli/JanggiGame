@@ -575,6 +575,7 @@ class Soldier(Piece):
             if abs(to_cartesian[0] - from_cartesian[0]) + abs(to_cartesian[1] - from_cartesian[1]) > 1:
                 return False
 
+        return True
 
 class GameBoard:
     """
@@ -908,6 +909,7 @@ class JanggiGame:
         pass
 
         # if there's a player that will be captured, change their location to 'CAPTURED'
+        other_piece = False
         for piece in self.get_player_obj('blue').get_pieces():
             if piece.get_location() == temp_to_location:
                 other_piece = True
@@ -1019,3 +1021,5 @@ class JanggiGame:
                 if self.checkmate_detected(self.get_current_player()):
                     self.set_game_state('RED_WON')
         return True
+
+
