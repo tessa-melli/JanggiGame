@@ -112,7 +112,7 @@ class General(Piece):
         """
         return self._directionality
 
-    def valid_move(self, from_cartesian, to_cartesian):
+    def meets_move_conditions(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
@@ -167,7 +167,7 @@ class Guard(Piece):
         """
         return self._directionality
 
-    def valid_move(self, from_cartesian, to_cartesian):
+    def meets_move_conditions(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
@@ -235,7 +235,7 @@ class Horse(Piece):
         """
         self._intermediate_locations.clear()
 
-    def valid_move(self, from_cartesian, to_cartesian):
+    def meets_move_conditions(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
@@ -298,7 +298,7 @@ class Elephant(Piece):
         """
         self._intermediate_locations.clear()
 
-    def valid_move(self, from_cartesian, to_cartesian):
+    def meets_move_conditions(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
@@ -371,7 +371,7 @@ class Chariot(Piece):
         """
         self._intermediate_locations.clear()
 
-    def valid_move(self, from_cartesian, to_cartesian):
+    def meets_move_conditions(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
@@ -464,7 +464,7 @@ class Cannon(Piece):
         """
         self._intermediate_locations.clear()
 
-    def valid_move(self, from_cartesian, to_cartesian):
+    def meets_move_conditions(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
@@ -545,7 +545,7 @@ class Soldier(Piece):
         """
         return self._directionality
 
-    def valid_move(self, from_cartesian, to_cartesian):
+    def meets_move_conditions(self, from_cartesian, to_cartesian):
         """
 
         :param from_cartesian:
@@ -917,9 +917,9 @@ class JanggiGame:
         # for each of alternate player's pieces:
         for opponent in self.get_opposite_player(player_color).get_pieces():
             if opponent.get_location() != 'CAPTURED':
-                if opponent.valid_move(self.algebraic_to_cartesian(opponent.get_location()),
-                                       self.algebraic_to_cartesian(general_location)) and \
-                        not self.move_is_blocked(opponent):   # THIS IS NOT CORRECT
+                if opponent.meets_move_conditions(self.algebraic_to_cartesian(opponent.get_location()),
+                                                  self.algebraic_to_cartesian(general_location)) and \
+                        not self.move_is_blocked(opponent):
                     return True
 
         return False
@@ -957,38 +957,8 @@ class JanggiGame:
                 opponent_piece.set_location(temp_to_location)
             return True
 
-    def checkmate_detected(self, player):
-        """
-        Determines if a checkmate state has been reached
-        :param player: player to assess a checkmate for
-        :return: True - if the player's general is checkmated
-                 False - if the player's general has not been checkmated
-        """
-
-        # Only runs if the is_in_check method returns true
-        # Whoever is in check, run through each piece and try to move them to each position on the board
-        # If any of these is a "valid" move, the test_move should be run to see if that got the player out of check
-        #   Test move should always put the piece back to its original location so it's not permanent due to a call here
-        #   If the player is out of check - return False
-        # Keep running through all possible moves, if none are found, return True
-
-    def make_move(self, from_location, to_location):
-        """
-        Performs the move of the player's turn
-        :param from_location: location to move from
-        :param to_location: location to move to
-        :return: False - if the move cannot be performed
-                 True - if the indicated move is performed
-        """
-
-        print("Attempting: ", from_location, "->", to_location)
-
-        # If the game has already been won
-        if self.get_game_state() != 'UNFINISHED':
-            return False
-        # If the from_location does not have a current player's piece
-        if not self.moving_own_piece(from_location, self.get_player_obj(self.get_current_player())):
-            return False
+    def valid_move(self, from_location, to_location):
+        """"""
         # If the to_location has another of the current player's pieces
         if not self.skipping_turn(from_location, to_location) and \
                 self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
@@ -996,8 +966,8 @@ class JanggiGame:
         # If the player is not skipping their turn
         if not self.skipping_turn(from_location, to_location):
             # If the indicated move is not legal due to movement rules of piece
-            if not self.get_current_piece().valid_move(self.algebraic_to_cartesian(from_location),
-                                                       self.algebraic_to_cartesian(to_location)):
+            if not self.get_current_piece().meets_move_conditions(self.algebraic_to_cartesian(from_location),
+                                                                  self.algebraic_to_cartesian(to_location)):
                 return False
             # if the move is blocked by another piece in the movement path
             if self.move_is_blocked(self.get_current_piece()):
@@ -1008,10 +978,47 @@ class JanggiGame:
         if not self.test_move(self.get_current_piece(), from_location, to_location):
             return False
 
+    def checkmate_detected(self, player):
+        """
+        Determines if a checkmate state has been reached
+        :param player: player to assess a checkmate for
+        :return: True - if the player's general is checkmated
+                 False - if the player's general has not been checkmated
+        """
+
+        # Whoever is in check, run through each piece and try to move them to each position on the board
+        for pieces in player.get_pieces():
+            for letter in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']:
+                for number in range(1, 11):
+                    if self.valid_move(pieces.get_location(), letter + str(number)) and \
+                            self.test_move(pieces, pieces.get_location(), letter + str(number)):
+                        return False
+        return True
+
+    def make_move(self, from_location, to_location):
+        """
+        Performs the move of the player's turn
+        :param from_location: location to move from
+        :param to_location: location to move to
+        :return: False - if the move cannot be performed
+                 True - if the indicated move is performed
+        """
+
+        # If the game has already been won
+        if self.get_game_state() != 'UNFINISHED':
+            return False
+        # If the from_location does not have a current player's piece
+        if not self.moving_own_piece(from_location, self.get_player_obj(self.get_current_player())):
+            return False
+
+        # If the move is not valid:
+        if not self.valid_move(from_location, to_location):
+            return False
+
         #   Make the indicated move
         self.get_current_piece().set_location(to_location)
 
-        # UPDATE THE GAME BOARD
+        # Update the game board
         self.get_game_board().modify_game_board(self.algebraic_to_cartesian(from_location)[0],
                                                 self.algebraic_to_cartesian(from_location)[1], '      ')
         self.get_game_board().modify_game_board(self.algebraic_to_cartesian(to_location)[0],
@@ -1025,13 +1032,13 @@ class JanggiGame:
         # conditions if current player is blue
         if self.get_current_player() == 'blue':
             self.set_current_player('red')
-            # if self.is_in_check(self.get_current_player()):
-            #    if self.checkmate_detected(self.get_current_player()):
-            #        self.set_game_state('BLUE_WON')
+            if self.is_in_check(self.get_current_player()):
+                if self.checkmate_detected(self.get_player_obj(self.get_current_player())):
+                    self.set_game_state('BLUE_WON')
         # conditions if current player is red
         else:
             self.set_current_player('blue')
-            # if self.is_in_check(self.get_current_player()):
-            #   if self.checkmate_detected(self.get_current_player()):
-            #        self.set_game_state('RED_WON')
+            if self.is_in_check(self.get_current_player()):
+                if self.checkmate_detected(self.get_player_obj(self.get_current_player())):
+                    self.set_game_state('RED_WON')
         return True
