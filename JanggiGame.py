@@ -1019,9 +1019,3 @@ class JanggiGame:
                 if self.checkmate_detected(self.get_current_player()):
                     self.set_game_state('RED_WON')
         return True
-
-
-JG = JanggiGame()
-print(JG.get_game_state())
-JG.get_game_board().print_game_board()
-print(JG.make_move('a4', 'a7'))
