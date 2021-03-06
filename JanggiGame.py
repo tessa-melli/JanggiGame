@@ -1023,13 +1023,3 @@ class JanggiGame:
                 if self.checkmate_detected(self.get_current_player()):
                     self.set_game_state('RED_WON')
         return True
-
-JG = JanggiGame()
-print(JG.make_move('c10', 'd8'))
-print(JG.get_current_piece())
-print(JG.make_move('c1', 'd3'))
-print(JG.get_current_piece()) # TEST move is doing something weird here
-
-
-print(JG.algebraic_to_cartesian('c10'))
-print(JG.cartesian_to_algebraic([10,3]))
