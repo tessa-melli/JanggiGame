@@ -882,6 +882,7 @@ class JanggiGame:
                                 return True
                             else:
                                 intermediate_pieces += 1
+
                 if intermediate_pieces != 1:
                     current_piece.clear_intermediate_locations()
                     return True
@@ -914,14 +915,14 @@ class JanggiGame:
 
         # find location of player's general
         general_location = self.get_player_obj(player_color).get_pieces()[0].get_location()
-        # for each of alternate player's pieces:
-        for opponent in self.get_opposite_player(player_color).get_pieces():
-            if opponent.get_location() != 'CAPTURED':
-                if opponent.meets_move_conditions(self.algebraic_to_cartesian(opponent.get_location()),
-                                                  self.algebraic_to_cartesian(general_location)) and \
-                        not self.move_is_blocked(opponent):
-                    return True
 
+        # for each of alternate player's pieces:
+        for opponent_piece in self.get_opposite_player(player_color).get_pieces():
+            if opponent_piece.get_location() != 'CAPTURED':
+                if opponent_piece.meets_move_conditions(self.algebraic_to_cartesian(opponent_piece.get_location()),
+                                                  self.algebraic_to_cartesian(general_location)):
+                    if not self.move_is_blocked(opponent_piece):
+                        return True
         return False
 
     def test_move(self, current_piece, from_location, temp_to_location):
@@ -964,24 +965,22 @@ class JanggiGame:
         :param to_location:
         :return:
         """
-        # If the to_location has another of the current player's pieces
-        if not self.skipping_turn(from_location, to_location) and \
-                self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
-            return False
+
         # If the player is not skipping their turn
         if not self.skipping_turn(from_location, to_location):
+
             # If the indicated move is not legal due to movement rules of piece
             if not self.get_current_piece().meets_move_conditions(self.algebraic_to_cartesian(from_location),
                                                                   self.algebraic_to_cartesian(to_location)):
                 return False
+
             # if the move is blocked by another piece in the movement path
             if self.move_is_blocked(self.get_current_piece()):
                 return False
+
             # if a cannon is attempting to capture another cannon
             if self.cannon_capturing_cannon(self.get_current_piece(), to_location):
                 return False
-        if not self.test_move(self.get_current_piece(), from_location, to_location):
-            return False
 
         return True
 
@@ -1011,17 +1010,27 @@ class JanggiGame:
                  True - if the indicated move is performed
         """
 
-        print("Attempting:" + from_location + "->" + to_location)
+        print("Attempting: " + from_location + "->" + to_location)
 
         # If the game has already been won
         if self.get_game_state() != 'UNFINISHED':
             return False
+
         # If the from_location does not have a current player's piece
         if not self.moving_own_piece(from_location, self.get_player_obj(self.get_current_player())):
             return False
 
+        # If the to_location has another of the current player's pieces
+        if not self.skipping_turn(from_location, to_location) and \
+                self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
+            return False
+
         # If the move is not valid:
         if not self.valid_move(from_location, to_location):
+            return False
+
+        # if the test_move results in the player being put in check
+        if not self.test_move(self.get_current_piece(), from_location, to_location):
             return False
 
         #   Make the indicated move
@@ -1051,3 +1060,30 @@ class JanggiGame:
                 if self.checkmate_detected(self.get_player_obj(self.get_current_player())):
                     self.set_game_state('RED_WON')
         return True
+
+
+"""
+JG = JanggiGame()
+print(JG.make_move('c7', 'c6'))
+print(JG.make_move('c1', 'd3'))
+print(JG.make_move('b10', 'd7'))
+print(JG.make_move('b3', 'e3'))
+print(JG.make_move('c10', 'd8'))
+print(JG.make_move('h1', 'g3'))
+print(JG.make_move('e7', 'e6'))
+print(JG.make_move('e3', 'e6'))
+print(JG.make_move('h8', 'c8'))
+print(JG.make_move('d3', 'e5'))
+print(JG.make_move('c8', 'c4'))
+print(JG.make_move('e5', 'c4'))
+print(JG.make_move('i10', 'i8'))
+print(JG.make_move('g4', 'f4'))
+print(JG.make_move('i8', 'f8'))
+print(JG.make_move('g3', 'h5'))
+print(JG.make_move('h10', 'g8'))
+print(JG.make_move('e6', 'e3'))
+JG.get_game_board().print_game_board()
+print(JG.get_current_player())
+print(JG.is_in_check('blue'))
+print(JG.is_in_check('red'))
+"""
