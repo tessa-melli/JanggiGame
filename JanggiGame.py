@@ -120,6 +120,8 @@ class General(Piece):
         :return:
         """
 
+        print("Testing meets_move_conditions for General Piece")
+
         # Trying to move guard out of the palace
         if to_cartesian not in self.get_palace(self.get_directionality()):
             return False
@@ -174,6 +176,8 @@ class Guard(Piece):
         :param to_cartesian:
         :return:
         """
+
+        print("Testing meets_move_conditions for Guard Piece")
 
         # Trying to move guard out of the palace
         if to_cartesian not in self.get_palace(self.get_directionality()):
@@ -243,6 +247,8 @@ class Horse(Piece):
         :return:
         """
 
+        print("Testing meets_move_conditions for Horse Piece")
+
         if abs(from_cartesian[0] - to_cartesian[0]) == 2 and abs(from_cartesian[1] - to_cartesian[1]) == 1:
             self.add_intermediate_location([int((from_cartesian[0]+to_cartesian[0]) / 2), from_cartesian[1]])
             return True
@@ -305,6 +311,8 @@ class Elephant(Piece):
         :param to_cartesian:
         :return:
         """
+
+        print("Testing meets_move_conditions for Elephant Piece")
 
         if from_cartesian[0] - to_cartesian[0] == 3 and abs(from_cartesian[1] - to_cartesian[1]) == 2:
             self.add_intermediate_location([from_cartesian[0] - 1, from_cartesian[1]])
@@ -378,6 +386,8 @@ class Chariot(Piece):
         :param to_cartesian:
         :return:
         """
+
+        print("Testing meets_move_conditions for Chariot Piece")
 
         # if moving in a straight line vertically
         if abs(from_cartesian[0] - to_cartesian[0]) > 0 and from_cartesian[1] - to_cartesian[1] == 0:
@@ -472,6 +482,8 @@ class Cannon(Piece):
         :return:
         """
 
+        print("Testing meets_move_conditions for Cannon Piece")
+
         # if moving in a straight line vertically
         if abs(from_cartesian[0] - to_cartesian[0]) > 0 and from_cartesian[1] - to_cartesian[1] == 0:
             # moving in the direction of decreasing rows
@@ -552,6 +564,8 @@ class Soldier(Piece):
         :param to_cartesian:
         :return:
         """
+
+        print("Testing meets_move_conditions for Soldier Piece")
 
         if abs(from_cartesian[1] - to_cartesian[1]) > 1:
             return False
@@ -844,6 +858,9 @@ class JanggiGame:
 
     def move_is_blocked(self, current_piece):
         """"""
+
+        print("testing move_is_blocked")
+
         # if the piece type is a 'HORSE', 'ELEPHANT', or 'CHARIOT'
         if (current_piece.get_piece_type() == 'HORSE' or
             current_piece.get_piece_type() == 'ELEPHANT' or
@@ -913,6 +930,8 @@ class JanggiGame:
                  False - if the player is not in check
         """
 
+        print("testing is_in_check")
+
         # find location of player's general
         general_location = self.get_player_obj(player_color).get_pieces()[0].get_location()
 
@@ -934,6 +953,8 @@ class JanggiGame:
         :return: True - if the move has not resulted in the player's general being put in or remaining in check
                  False - if the move has resulted in the player's general being put in or remaining in check
         """
+
+        print("testing test_move")
 
         # if there's a player that will be captured, change their location to 'CAPTURED'
         other_piece = False
@@ -966,6 +987,8 @@ class JanggiGame:
         :return:
         """
 
+        print("testing valid_move")
+
         # If the player is not skipping their turn
         if not self.skipping_turn(from_location, to_location):
 
@@ -991,6 +1014,8 @@ class JanggiGame:
         :return: True - if the player's general is checkmated
                  False - if the player's general has not been checkmated
         """
+
+        print("testing checkmate_detected")
 
         # Whoever is in check, run through each piece and try to move them to each position on the board
         for pieces in player.get_pieces():
