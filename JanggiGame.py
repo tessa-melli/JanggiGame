@@ -930,7 +930,7 @@ class JanggiGame:
                  False - if the player is not in check
         """
 
-        print("testing is_in_check")
+        print("testing is_in_check for ", player_color)
 
         # find location of player's general
         general_location = self.get_player_obj(player_color).get_pieces()[0].get_location()
