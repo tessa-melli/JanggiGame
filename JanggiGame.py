@@ -1,6 +1,6 @@
 # Author: Tessa Melli
 # Date: 3/11/21
-# Description:
+# Description: Defines a 2-player game of Janggi with the following rules:
 
 
 class Piece:
@@ -120,8 +120,6 @@ class General(Piece):
         :return:
         """
 
-        print("Testing meets_move_conditions for General Piece")
-
         # Trying to move guard out of the palace
         if to_cartesian not in self.get_palace(self.get_directionality()):
             return False
@@ -176,8 +174,6 @@ class Guard(Piece):
         :param to_cartesian:
         :return:
         """
-
-        print("Testing meets_move_conditions for Guard Piece")
 
         # Trying to move guard out of the palace
         if to_cartesian not in self.get_palace(self.get_directionality()):
@@ -247,8 +243,6 @@ class Horse(Piece):
         :return:
         """
 
-        print("Testing meets_move_conditions for Horse Piece")
-
         if abs(from_cartesian[0] - to_cartesian[0]) == 2 and abs(from_cartesian[1] - to_cartesian[1]) == 1:
             self.add_intermediate_location([int((from_cartesian[0]+to_cartesian[0]) / 2), from_cartesian[1]])
             return True
@@ -311,8 +305,6 @@ class Elephant(Piece):
         :param to_cartesian:
         :return:
         """
-
-        print("Testing meets_move_conditions for Elephant Piece")
 
         if from_cartesian[0] - to_cartesian[0] == 3 and abs(from_cartesian[1] - to_cartesian[1]) == 2:
             self.add_intermediate_location([from_cartesian[0] - 1, from_cartesian[1]])
@@ -386,8 +378,6 @@ class Chariot(Piece):
         :param to_cartesian:
         :return:
         """
-
-        print("Testing meets_move_conditions for Chariot Piece")
 
         # if moving in a straight line vertically
         if abs(from_cartesian[0] - to_cartesian[0]) > 0 and from_cartesian[1] - to_cartesian[1] == 0:
@@ -482,8 +472,6 @@ class Cannon(Piece):
         :return:
         """
 
-        print("Testing meets_move_conditions for Cannon Piece")
-
         # if moving in a straight line vertically
         if abs(from_cartesian[0] - to_cartesian[0]) > 0 and from_cartesian[1] - to_cartesian[1] == 0:
             # moving in the direction of decreasing rows
@@ -564,8 +552,6 @@ class Soldier(Piece):
         :param to_cartesian:
         :return:
         """
-
-        print("Testing meets_move_conditions for Soldier Piece")
 
         if abs(from_cartesian[1] - to_cartesian[1]) > 1:
             return False
@@ -859,8 +845,6 @@ class JanggiGame:
     def move_is_blocked(self, current_piece):
         """"""
 
-        print("testing move_is_blocked")
-
         # if the piece type is a 'HORSE', 'ELEPHANT', or 'CHARIOT'
         if (current_piece.get_piece_type() == 'HORSE' or
             current_piece.get_piece_type() == 'ELEPHANT' or
@@ -930,8 +914,6 @@ class JanggiGame:
                  False - if the player is not in check
         """
 
-        print("testing is_in_check for ", player_color)
-
         # find location of player's general
         general_location = self.get_player_obj(player_color).get_pieces()[0].get_location()
 
@@ -939,7 +921,7 @@ class JanggiGame:
         for opponent_piece in self.get_opposite_player(player_color).get_pieces():
             if opponent_piece.get_location() != 'CAPTURED':
                 if opponent_piece.meets_move_conditions(self.algebraic_to_cartesian(opponent_piece.get_location()),
-                                                  self.algebraic_to_cartesian(general_location)):
+                                                        self.algebraic_to_cartesian(general_location)):
                     if not self.move_is_blocked(opponent_piece):
                         return True
         return False
@@ -954,15 +936,21 @@ class JanggiGame:
                  False - if the move has resulted in the player's general being put in or remaining in check
         """
 
-        print("testing test_move")
-
         # if there's a player that will be captured, change their location to 'CAPTURED'
         other_piece = False
-        for piece in self.get_player_obj('blue').get_pieces():
-            if piece.get_location() == temp_to_location:
-                other_piece = True
-                opponent_piece = piece
-                piece.set_location('CAPTURED')
+
+        if from_location != temp_to_location:
+            for piece in self.get_player_obj('blue').get_pieces():
+                if piece.get_location() == temp_to_location:
+                    other_piece = True
+                    opponent_piece = piece
+                    piece.set_location('CAPTURED')
+
+            for piece in self.get_player_obj('red').get_pieces():
+                if piece.get_location() == temp_to_location:
+                    other_piece = True
+                    opponent_piece = piece
+                    piece.set_location('CAPTURED')
 
         # change the current piece's location to the temp_to_location
         current_piece.set_location(temp_to_location)
@@ -987,14 +975,21 @@ class JanggiGame:
         :return:
         """
 
-        print("testing valid_move")
+        # If the piece to be moved is captured:
+        if self.get_current_piece().get_location() == 'CAPTURED':
+            return False
+
+        # If the to_location has another of the current player's pieces
+        if not self.skipping_turn(from_location, to_location) and \
+                self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
+            return False
 
         # If the player is not skipping their turn
         if not self.skipping_turn(from_location, to_location):
 
             # If the indicated move is not legal due to movement rules of piece
             if not self.get_current_piece().meets_move_conditions(self.algebraic_to_cartesian(from_location),
-                                                                  self.algebraic_to_cartesian(to_location)):
+                                                       self.algebraic_to_cartesian(to_location)):
                 return False
 
             # if the move is blocked by another piece in the movement path
@@ -1015,14 +1010,18 @@ class JanggiGame:
                  False - if the player's general has not been checkmated
         """
 
-        print("testing checkmate_detected")
-
         # Whoever is in check, run through each piece and try to move them to each position on the board
         for pieces in player.get_pieces():
+            self.set_current_piece(pieces)
             for letter in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']:
                 for number in range(1, 11):
                     if self.valid_move(pieces.get_location(), letter + str(number)) and \
                             self.test_move(pieces, pieces.get_location(), letter + str(number)):
+                        print(self.valid_move(pieces.get_location(), letter + str(number)))
+                        print(self.test_move(pieces, pieces.get_location(), letter + str(number)))
+                        print(pieces.get_nickname())
+                        print(pieces.get_location())
+                        print(letter + str(number))
                         return False
         return True
 
@@ -1043,11 +1042,6 @@ class JanggiGame:
 
         # If the from_location does not have a current player's piece
         if not self.moving_own_piece(from_location, self.get_player_obj(self.get_current_player())):
-            return False
-
-        # If the to_location has another of the current player's pieces
-        if not self.skipping_turn(from_location, to_location) and \
-                self.capturing_own_piece(to_location, self.get_player_obj(self.get_current_player())):
             return False
 
         # If the move is not valid:
@@ -1078,6 +1072,7 @@ class JanggiGame:
             if self.is_in_check(self.get_current_player()):
                 if self.checkmate_detected(self.get_player_obj(self.get_current_player())):
                     self.set_game_state('BLUE_WON')
+
         # conditions if current player is red
         else:
             self.set_current_player('blue')
@@ -1089,26 +1084,41 @@ class JanggiGame:
 
 """
 JG = JanggiGame()
+JG.get_game_board().print_game_board()
+print(JG.make_move('a7', 'a6'))
+print(JG.make_move('i4', 'i3'))
+print(JG.make_move('a6', 'a5'))
+print(JG.make_move('a4', 'a5'))
 print(JG.make_move('c7', 'c6'))
 print(JG.make_move('c1', 'd3'))
-print(JG.make_move('b10', 'd7'))
-print(JG.make_move('b3', 'e3'))
-print(JG.make_move('c10', 'd8'))
-print(JG.make_move('h1', 'g3'))
+print(JG.make_move('c6', 'c5'))
+print(JG.make_move('c4', 'c5'))
 print(JG.make_move('e7', 'e6'))
-print(JG.make_move('e3', 'e6'))
-print(JG.make_move('h8', 'c8'))
-print(JG.make_move('d3', 'e5'))
-print(JG.make_move('c8', 'c4'))
-print(JG.make_move('e5', 'c4'))
-print(JG.make_move('i10', 'i8'))
-print(JG.make_move('g4', 'f4'))
-print(JG.make_move('i8', 'f8'))
-print(JG.make_move('g3', 'h5'))
-print(JG.make_move('h10', 'g8'))
-print(JG.make_move('e6', 'e3'))
-JG.get_game_board().print_game_board()
-print(JG.get_current_player())
+print(JG.make_move('b1', 'd4'))
+print(JG.make_move('e6', 'e5'))
+print(JG.make_move('e4', 'e5'))
+print(JG.make_move('g7', 'g6'))
+print(JG.make_move('d4', 'g6'))
+print(JG.make_move('e9', 'e10'))
+print(JG.make_move('h3', 'c3'))
+print(JG.make_move('i7', 'i6'))
+print(JG.make_move('c3', 'c10'))
+print(JG.make_move('d10', 'd9'))
+print(JG.make_move('c10', 'a10'))
+print(JG.make_move('d9', 'd10'))
+print(JG.make_move('b3', 'e3'))
+print(JG.make_move('f10', 'e9'))
+print(JG.make_move('g6', 'e9'))
+print(JG.make_move('i6', 'i5'))
+print(JG.make_move('a1', 'a4'))
+print(JG.make_move('i5', 'i4'))
+print(JG.make_move('a4', 'd4'))
+print(JG.make_move('i4', 'i3'))
+print(JG.make_move('d4', 'd10'))
 print(JG.is_in_check('blue'))
-print(JG.is_in_check('red'))
+print(JG.make_move('i10', 'd10'))
+
+print(JG.get_game_state())
+
+JG.get_game_board().print_game_board()
 """
