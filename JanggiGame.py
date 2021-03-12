@@ -1,6 +1,6 @@
 # Author: Tessa Melli
 # Date: 3/11/21
-# Description: Defines a 2-player game of Janggi with the following rules:
+# Description: Defines a 2-player game of Janggi with an interactive make_move method
 
 
 class Piece:
