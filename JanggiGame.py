@@ -865,8 +865,6 @@ class JanggiGame:
             current_piece.get_piece_type() == 'CHARIOT') and \
                 len(current_piece.get_intermediate_locations()) != 0:
             # conditions for HORSE, ELEPHANT, or 'CHARIOT'
-            print(current_piece.get_piece_type())
-            print(current_piece.get_intermediate_locations())
             for intermediate_location in current_piece.get_intermediate_locations():
                 for red_piece in self.get_player_obj('red').get_pieces():
                     if red_piece.get_location() == self.cartesian_to_algebraic(intermediate_location):
@@ -1051,11 +1049,6 @@ class JanggiGame:
                 for number in range(1, 11):
                     if self.valid_move(pieces.get_location(), letter + str(number)) and \
                             self.test_move(pieces, pieces.get_location(), letter + str(number)):
-                        print(self.valid_move(pieces.get_location(), letter + str(number)))
-                        print(self.test_move(pieces, pieces.get_location(), letter + str(number)))
-                        print(pieces.get_nickname())
-                        print(pieces.get_location())
-                        print(letter + str(number))
                         return False
         return True
 
@@ -1067,8 +1060,6 @@ class JanggiGame:
         :return: False - if the move cannot be performed
                  True - if the indicated move is performed
         """
-
-        print("Attempting: " + from_location + "->" + to_location)
 
         # If the game has already been won
         if self.get_game_state() != 'UNFINISHED':
