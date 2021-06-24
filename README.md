@@ -6,6 +6,6 @@ JanggiGame is the back end framework for a computerized version of the game of J
 
 ## Future directions
 
-* Create the front end for a better user experience
+* Create the front end using PyGame for a better user experience
 * Host the game in an online format
 * Enable the option to play in 2-player mode or against the computer
